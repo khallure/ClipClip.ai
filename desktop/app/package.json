@@ -1,0 +1,8 @@
+{
+  "name": "podcut-ai-installer-dev",
+  "productName": "PODCUTAI-InstallerDev",
+  "version": "1.0.0",
+  "private": true,
+  "main": "main.cjs",
+  "description": "PODCUT AI private desktop development package"
+}

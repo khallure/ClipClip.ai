@@ -1,0 +1,65 @@
+{
+  "repo": "Junhua-Liao/Light-ASD",
+  "commit": "ed38c232de5efe0261dbd68627c0ade7cdfe14eb",
+  "license": "MIT",
+  "files": [
+    {
+      "file": "LICENSE",
+      "bytes": 1068,
+      "sha256": "3c5b187c06d6c0fdcfe02ad73f51470eaa35045cc2e60749d805332d98441eb1",
+      "url": "https://raw.githubusercontent.com/Junhua-Liao/Light-ASD/ed38c232de5efe0261dbd68627c0ade7cdfe14eb/LICENSE"
+    },
+    {
+      "file": "README.md",
+      "bytes": 4430,
+      "sha256": "bc4fa292280e662c6f5bf0f0cb2b0397b3f309903ca38ef125ef8acd8d946ac3",
+      "url": "https://raw.githubusercontent.com/Junhua-Liao/Light-ASD/ed38c232de5efe0261dbd68627c0ade7cdfe14eb/README.md"
+    },
+    {
+      "file": "model/Classifier.py",
+      "bytes": 1047,
+      "sha256": "21fdebc3c08ee3a386111719035f06461b29548b9b900eff3e17e4083f4377f8",
+      "url": "https://raw.githubusercontent.com/Junhua-Liao/Light-ASD/ed38c232de5efe0261dbd68627c0ade7cdfe14eb/model/Classifier.py"
+    },
+    {
+      "file": "model/Encoder.py",
+      "bytes": 6158,
+      "sha256": "c4a85b8aa5eaab428f79836c5d9511a01ac45bfeb6dccc75e06c1e9eff25520c",
+      "url": "https://raw.githubusercontent.com/Junhua-Liao/Light-ASD/ed38c232de5efe0261dbd68627c0ade7cdfe14eb/model/Encoder.py"
+    },
+    {
+      "file": "model/Model.py",
+      "bytes": 1344,
+      "sha256": "6094bfaab7d5a701e1580ee6ec89c7cfea2baacf62b3ceafff5558f31dd3fc8d",
+      "url": "https://raw.githubusercontent.com/Junhua-Liao/Light-ASD/ed38c232de5efe0261dbd68627c0ade7cdfe14eb/model/Model.py"
+    },
+    {
+      "file": "loss.py",
+      "bytes": 1125,
+      "sha256": "155200fa5b19dc2405ff5f46c2028db6d3f111e8a3b04d5161af961ec80599aa",
+      "url": "https://raw.githubusercontent.com/Junhua-Liao/Light-ASD/ed38c232de5efe0261dbd68627c0ade7cdfe14eb/loss.py"
+    },
+    {
+      "file": "Columbia_test.py",
+      "bytes": 22033,
+      "sha256": "c1464376a8960e1a94901cc80e590360a8c9e872a154311e6b6130a2d838b336",
+      "url": "https://raw.githubusercontent.com/Junhua-Liao/Light-ASD/ed38c232de5efe0261dbd68627c0ade7cdfe14eb/Columbia_test.py"
+    },
+    {
+      "file": "weight/pretrain_AVA_CVPR.model",
+      "bytes": 4175289,
+      "sha256": "d44bc3ea7baa8e0946fa3921311714a630ed8b90a1928fab0dbe30d918909317",
+      "url": "https://raw.githubusercontent.com/Junhua-Liao/Light-ASD/ed38c232de5efe0261dbd68627c0ade7cdfe14eb/weight/pretrain_AVA_CVPR.model"
+    },
+    {
+      "file": "weight/finetuning_TalkSet.model",
+      "bytes": 4175289,
+      "sha256": "efc375833887eefa9d209dc92810e18519b04c3c73ea35a549f2a7f40b7d94d5",
+      "url": "https://raw.githubusercontent.com/Junhua-Liao/Light-ASD/ed38c232de5efe0261dbd68627c0ade7cdfe14eb/weight/finetuning_TalkSet.model"
+    }
+  ],
+  "selected_checkpoint": "weight/finetuning_TalkSet.model",
+  "installed_checkpoint": "light-asd-talkset.model",
+  "license_scope": "MIT license at repository root; weights distributed inside the same repository; no separate weight-specific license found.",
+  "reference": "Liao et al., Light-ASD: How Effective Can a Lightweight Frame-level Active Speaker Detection Framework Be?, CVPR 2023"
+}

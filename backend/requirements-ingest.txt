@@ -1,0 +1,4 @@
+# Optional authorized source adapter; core upload/clipping works without this.
+# Pinned because the HTTPS-only request handler uses this release's embedding API.
+# FFmpeg + FFprobe + Node.js must already be installed; no remote EJS components.
+yt-dlp[default]==2026.10.26

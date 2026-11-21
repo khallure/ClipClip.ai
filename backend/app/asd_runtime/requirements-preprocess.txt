@@ -1,0 +1,6 @@
+# Install only in the optional isolated ASD environment. Install Torch separately
+# from its official CPU/CUDA wheel index; do not change the core V1 environment.
+numpy==1.26.4
+scipy==1.15.3
+python_speech_features==0.6
+opencv-python==4.11.0.86
