@@ -20,7 +20,7 @@
 | Live Handoff Stage H1 (Safe Auto-Publisher Audit) | **SELESAI (READ-ONLY AUDIT).** Arsitektur least-privilege (`drive.file` + one-time Picker), sanitasi fail-closed, penyimpanan DPAPI di luar Git, dan tahapan implementasi selesai diaudit tanpa mengubah file. |
 | Live Handoff Stage H2A (Offline Status Schema, Sanitizer & Renderer) | **SELESAI (`12 PASS`, `0 FAIL`, `0 SKIP` dalam `0,250s`, mencakup 25 subtest sanitasi).** `docs/LIVE_STATUS.json`, paket stdlib `scripts/live_handoff/`, wrapper `scripts/publish-live-status.ps1`, dan `scripts/tests/test_live_handoff.py` lulus 100% offline dengan `0` request jaringan dan `0` perubahan `.venv`/backend/frontend/desktop. |
 | Live Handoff Stage H2B+ (Bounded Docs Writer / OAuth / DPAPI / Automasi) | **NOT RUN (Menunggu Persetujuan).** Belum diimplementasikan; wajib memakai area terkelola (`BEGIN`/`END`) agar konten manual & marker `LIVE_REFRESH_TEST` di Google Docs produksi tidak terhapus. |
-| Git | Belum disiapkan untuk workspace ini. Branch, SHA lokal, dan SHA remote belum tersedia. |
+| Git | **AKTIF (Lokal PC B).** Branch `main`, commit baseline `f603408bc63779a513b03db4606ae15e2f6ae36f` (`169` file terverifikasi, `0` rahasia, `.dev/`/`.tools/`/`.venv/`/`node_modules/`/`.next/`/`stage-1/` ter-ignore). Identitas repo-lokal saja (`PODCUT MultiPC Dev <podcut-local@localhost>`). Remote privat: `NOT CONFIGURED` (menunggu URL repo privat pengguna). |
 | Paket historis | Phase 3A dan Quality Upgrade V1 tersimpan sebagai referensi terlindungi dan tidak disentuh. |
 
 ## Cara berpindah sesi
@@ -31,6 +31,22 @@
 4. Di komputer berikutnya, cocokkan SHA branch sebelum bekerja. Jalankan pemeriksaan minimum dari clone dan profil komputer itu. Jika komputer asal mati, gunakan checkpoint remote terakhir atau cadangan Git terenkripsi yang sudah tersedia. Catat perubahan yang masih lokal saat sesi asal berhenti.
 
 ## Pembaruan bukti
+
+### Checkpoint Git Lokal — 21 November 2026 (PC B)
+
+- **Tujuan dan batas persetujuan:** Menginisialisasi repository Git lokal di PC B (`branch main`) menggunakan identitas repo-lokal saja (`PODCUT MultiPC Dev <podcut-local@localhost>`) tanpa mengubah konfigurasi Git global, melakukan pemindaian rahasia & path terlarang pra-commit, lalu mengamankan seluruh baseline Stage 1 → 2C.5 + H2A dalam checkpoint commit lokal sebelum menyambungkan repo remote privat.
+- **Komputer dan agent:** PC B — Antigravity.
+- **Branch | SHA lokal baseline | SHA remote:** `main` | `f603408bc63779a513b03db4606ae15e2f6ae36f` | `NOT CONFIGURED` (belum ada remote / belum push).
+- **Audit pra-commit & integritas:**
+  - Total file terlacak pada commit baseline: **`169` file (`2,36 MB`)** mengikuti `.gitignore`.
+  - File/folder sensitif & runtime yang terverifikasi **ter-ignore (`0` masuk Git)**: `.dev/`, `.tools/`, `.venv/`, `frontend/node_modules/`, `frontend/.next/`, `frontend/tsconfig.tsbuildinfo`, `desktop/node_modules/`, `stage-1/`, semua `*.env` (kecuali `backend/.env.example`), `*.log`, `*.zip`, `*.exe`, `*.dll`.
+  - Pemindaian rahasia: **`0` rahasia / token / API key nyata** (6 string dummy pada `scripts/tests/test_live_handoff.py` adalah fixture sintetis unit test sanitizer; catatan: jika nanti push ke GitHub dengan Push Protection aktif, fixture dummy tersebut bisa perlu dibuat secara dinamis bila terpicu).
+  - Konfigurasi Git ditulis strictly `--local` (`.git/config`), tidak menyentuh `~/.gitconfig`.
+  - Integritas working tree: `backend/app/runtime_profile.py` tetap identik Stage 1 SHA-256 (`3d1507dcb026dc2f725a393fde0c03cbc233e74030d0967079a573152e010025`); `scripts/start.ps1` tetap identik Stage 2C.5 SHA-256 (`c41276350b62a10a53f2726f8e22c982665fa6a4cb72e2abe887c9f8d64d0020`).
+- **Satu langkah berikutnya (Menunggu Input Pengguna):**
+  - Menerima URL repo remote privat (mis. GitHub privat) dari pengguna untuk mendaftarkan `origin` dan (setelah persetujuan eksplisit) melakukan push checkpoint `main` dengan aman.
+
+---
 
 ### Checkpoint Stage 2C.5 — 21 November 2026 (PC B)
 
