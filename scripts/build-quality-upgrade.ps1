@@ -18,8 +18,15 @@ function Resolve-BuildPath([string]$Path, [string]$Boundary = $Project) {
 
 function Invoke-BuildStep([string]$Tool, [string[]]$Arguments, [string]$Log) {
     Write-Host "Menjalankan $Log"
-    & $Tool @Arguments *> (Join-Path $Run $Log)
-    if ($LASTEXITCODE -ne 0) {
+    $previousErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $Tool @Arguments *> (Join-Path $Run $Log)
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorAction
+    }
+    if ($exitCode -ne 0) {
         Get-Content -LiteralPath (Join-Path $Run $Log) -Tail 18
         throw "Build gagal di $Log."
     }

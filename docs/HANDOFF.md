@@ -16,11 +16,13 @@
 | Stage 2C.3 & 2C.3 FIX (Frontend Typecheck/Build & Desktop Node Tests) | **SELESAI (`PASS`).** Frontend `tsc --noEmit` (`PASS`) & `next build --webpack` (`PASS`, `frontend/.next/BUILD_ID` & `standalone/server.js` siap). Setelah eksekusi awal desktop Node tests mencatat `9 PASS / 2 FAIL` karena fixture `profile_root` lama, 3 file tes (`boundaries.test.cjs`, `portability.test.cjs`, `frontend-traces.test.cjs`) disesuaikan tanpa mengubah `desktop/app/boundaries.cjs` (tetap identik Stage 1 SHA-256) dan retest lulus penuh **`16 / 16 PASS`** (`6,90s`). |
 | Stage 2C.4 (Core Backend Feature Suites — 21 File Tes) | **SELESAI (`549 PASS`, `0 FAIL`, `2 SKIP` dalam `110,39s`).** Seluruh 21 suite fitur inti backend (API, analisis klip, durasi, caption Poppins, reframe, active speaker, ingestion, media/FFmpeg, model provisioning, AI config/provider offline) lulus tanpa 1 pun kegagalan di PC B; `2 SKIP` di `test_reframe_detection.py` wajar karena file bobot YuNet belum disalin ke `.dev/profile/models/reframe/`. |
 | Stage 2C.5 (Launcher Smoke Test `start.ps1` & `stop.ps1`) | **SELESAI (`PASS`).** Perbaikan pra-uji di `scripts/start.ps1` (menambahkan `workspace_id = $script:WorkspaceId` ke `$state` + validasi fail-closed `Assert-DevState $state` sebelum `Start-Process`). `start.ps1 -NoBrowser` menyalakan backend (`127.0.0.1:8300`) & frontend (`127.0.0.1:3300`) dengan sukses (`HTTP 200` pada `/`, `/api/runtime-identity`, `/api/health`; `ffmpeg`/`ffprobe`/`whisper` = `true`; tolak `403` pada request langsung tanpa token & `Origin` palsu), lalu `stop.ps1` mematikan seluruh proses dan melepas port ke `0`. |
-| Stage 2D+ (Uji Alur Klip Sintetis End-to-End / Build Paket Desktop / Git Checkpoint) | **NOT RUN (Menunggu Persetujuan).** |
+| Stage 2D (Uji End-to-End Video Sintetis & Auto-Face Reframe) | **SELESAI (`PASS`, `35 / 35` cek + probe YuNet Reframe + ekspor gabungan).** `scripts/verify-phase2a-flow.py` diporting ke marker MultiPC (`podcut-dev-workspace.json`) dan lulus penuh melawan Studio live `127.0.0.1:3300` (upload 45s H.264/AAC, analisis heuristik `20s`, preview & ekspor `1080x1920` Poppins Highlight `#D7F35C` + ASS/SRT/VTT, ekspor original `640x360`, range `206`, cache reuse, contact sheet visual terverifikasi). Probe tambahan `POST /reframe/analyze` (`YuNet 2023mar`, 9 sampel wajah) + ekspor `vertical` gabungan `reframe_id` + Poppins juga **`PASS`**. |
+| Stage 2E (Build Paket Desktop Privat `build-quality-upgrade.ps1`) | **SELESAI (`BUILD PASS`, manifest terverifikasi).** Perbaikan kompatibilitas Windows PowerShell 5.1 pada `Invoke-BuildStep` di `scripts/build-quality-upgrade.ps1`. Build penuh selesai di `quality-upgrade/runs/1dfec1a0-005c-4af7-b09b-465c949c1857/dist/PODCUTAI-InstallerDev-win32-x64` (`4.581` file, `1.098,64 MB`, `257` third-party notices, Electron fuses aktif, `0` `.env` bocor, `yt_dlp_ejs` & YuNet SHA-256 cocok). |
+| Stage 2F (Uji Eksekusi Runtime Paket Desktop `.exe` Baru — Profil Terisolasi) | **SELESAI (`PASS` dengan 2 catatan QA jalur dalam).** `PODCUTBackend.exe --bootstrap-info`, peluncuran nyata `PODCUTAI-InstallerDev.exe --isolated-profile <uuid>`, auto-seed `backend.env` + `face_detection_yunet_2023mar.onnx` (SHA-256 cocok), UI React di dalam Electron (`/api/jobs`, `/api/health`, `/api/models/whisper` `200 OK`), proteksi `403` tanpa `x-podcut-ui-token`/`x-podcut-run-token`, verifikasi `/api/health` frozen (`packaged=true`, `build=phase3a`, `ffmpeg`/`ffprobe`/`youtube_ingest.available`/`reframe.auto_face` semua `true`), serta shutdown Windows Job Object (`clean=true`, `active_processes=0`, port `3300`/`8300` = `0`) seluruhnya terverifikasi di PC B tanpa menyentuh `%LOCALAPPDATA%` maupun `.dev/profile`. |
 | Live Handoff Stage H1 (Safe Auto-Publisher Audit) | **SELESAI (READ-ONLY AUDIT).** Arsitektur least-privilege (`drive.file` + one-time Picker), sanitasi fail-closed, penyimpanan DPAPI di luar Git, dan tahapan implementasi selesai diaudit tanpa mengubah file. |
 | Live Handoff Stage H2A (Offline Status Schema, Sanitizer & Renderer) | **SELESAI (`12 PASS`, `0 FAIL`, `0 SKIP` dalam `0,250s`, mencakup 25 subtest sanitasi).** `docs/LIVE_STATUS.json`, paket stdlib `scripts/live_handoff/`, wrapper `scripts/publish-live-status.ps1`, dan `scripts/tests/test_live_handoff.py` lulus 100% offline dengan `0` request jaringan dan `0` perubahan `.venv`/backend/frontend/desktop. |
 | Live Handoff Stage H2B+ (Bounded Docs Writer / OAuth / DPAPI / Automasi) | **NOT RUN (Menunggu Persetujuan).** Belum diimplementasikan; wajib memakai area terkelola (`BEGIN`/`END`) agar konten manual & marker `LIVE_REFRESH_TEST` di Google Docs produksi tidak terhapus. |
-| Git | **AKTIF (Lokal PC B).** Branch `main`, commit baseline `f603408bc63779a513b03db4606ae15e2f6ae36f` (`169` file terverifikasi, `0` rahasia, `.dev/`/`.tools/`/`.venv/`/`node_modules/`/`.next/`/`stage-1/` ter-ignore). Identitas repo-lokal saja (`PODCUT MultiPC Dev <podcut-local@localhost>`). Remote privat: `NOT CONFIGURED` (menunggu URL repo privat pengguna). |
+| Git | **AKTIF & TERSINKRON ke GitHub Privat (`origin/main`).** Remote `origin`: `https://github.com/khallure/ClipClip.ai.git`; `main` & `origin/main` terverifikasi di `42373a28c15c3c3e3caa542cba15171c9a41f14b` (baseline `f603408` + handoff `42373a2`). Perubahan lokal Stage 2D–2F (`scripts/verify-phase2a-flow.py`, `scripts/build-quality-upgrade.ps1`, `docs/HANDOFF.md`) belum di-commit/push (menunggu persetujuan). |
 | Paket historis | Phase 3A dan Quality Upgrade V1 tersimpan sebagai referensi terlindungi dan tidak disentuh. |
 
 ## Cara berpindah sesi
@@ -31,6 +33,89 @@
 4. Di komputer berikutnya, cocokkan SHA branch sebelum bekerja. Jalankan pemeriksaan minimum dari clone dan profil komputer itu. Jika komputer asal mati, gunakan checkpoint remote terakhir atau cadangan Git terenkripsi yang sudah tersedia. Catat perubahan yang masih lokal saat sesi asal berhenti.
 
 ## Pembaruan bukti
+
+### Checkpoint Stage 2F — 21 November 2026 (PC B)
+
+- **Tujuan dan batas persetujuan:** Menguji eksekusi runtime nyata dari paket desktop privat hasil build Stage 2E (`quality-upgrade/runs/1dfec1a0-005c-4af7-b09b-465c949c1857/dist/PODCUTAI-InstallerDev-win32-x64/PODCUTAI-InstallerDev.exe` & `PODCUTBackend.exe`) menggunakan `--isolated-profile <uuid>` baru agar `%LOCALAPPDATA%` dan `.dev/profile` tidak tersentuh.
+- **Komputer dan agent:** PC B — Antigravity.
+- **Branch | SHA lokal | SHA remote:** `main` | `42373a28c15c3c3e3caa542cba15171c9a41f14b` *(+3 perubahan lokal belum di-commit: `scripts/verify-phase2a-flow.py`, `scripts/build-quality-upgrade.ps1`, `docs/HANDOFF.md`)* | `origin/main` `42373a28c15c3c3e3caa542cba15171c9a41f14b`.
+- **Perubahan source pada Stage 2F:**
+  - Tidak ada file source implementasi maupun file tes yang diubah. Hanya `docs/HANDOFF.md` yang diperbarui.
+- **Perintah dan hasil PASS / FAIL / NOT RUN:**
+  - **Prapemeriksaan:** `scripts/stop.ps1` membersihkan record DEV lama (`exit 0`); port `3300=0`, `8300=0`.
+  - **Uji 1 — Frozen `--bootstrap-info` (read-only):** **`PASS`** (`exit 0`, `schema=1`, `build=phase3a`, `profile_id=installer-dev`, `profile_root` mengarah ke `quality-upgrade/runs/1dfec1a0-.../PODCUTAI-InstallerDev/profiles/<uuid>` melalui `quality_dev_profile.py`, direktori profil belum dibuat).
+  - **Uji 2 — Peluncuran nyata `PODCUTAI-InstallerDev.exe --isolated-profile 2e2a7e73-be9b-4b57-9d1e-637e168e3332`:** **`PASS` (dengan 2 catatan QA jalur dalam)**:
+    - `runtime/desktop/<run_id>.json` mencapai `status=ready` (`desktop_pid=25160`, `host_pid=15508`, `backend=23540`, `frontend=11140`), `LIVE_PORT_3300=1`, `LIVE_PORT_8300=1`.
+    - `desktop.log` mencatat `Verified private frontend and backend; opening isolated desktop UI.`, dan `backend.stdout.log` membuktikan UI React di dalam `BrowserWindow` Electron memuat penuh `/api/jobs`, `/api/health`, dan `/api/models/whisper` (`HTTP 200 OK`) menggunakan `x-podcut-ui-token`.
+    - Auto-seed profil baru bekerja: `config/backend.env` (`YOUTUBE_INGEST_ENABLED=true`, `AI_PROVIDER=heuristic`) dan `models/reframe/face_detection_yunet_2023mar.onnx` (SHA-256 cocok `8f2383e4...2fa4`).
+    - Proteksi keamanan tanpa token menolak semua request eksternal dengan **`HTTP 403`** (`GET 3300/`, `GET 3300/api/health`, `GET 8300/api/runtime-identity`).
+    - Crash-safety Job Object: setelah proses Electron ditutup, `POST_TESTA_PORT_3300=0` dan `POST_TESTA_PORT_8300=0`.
+    - *Catatan 1:* Jalur profil QA bersarang sangat dalam (`258` karakter) memicu peringatan non-fatal Chromium `GPUPersistentCache\DawnGraphiteCache` (`0xCE` Windows MAX_PATH) di stderr tanpa menghentikan aplikasi; tidak terjadi pada jalur instalasi/profil normal yang lebih pendek.
+    - *Catatan 2:* Pemanggilan `CloseMainWindow()` otomatis pada skrip PowerShell uji mengalami timeout (window non-interaktif/judul UTF-8) sehingga ditutup via `Kill()`; shutdown normal bersih diverifikasi eksplisit pada Uji 3 di bawah.
+  - **Uji 3 — Verifikasi `/api/health`, `/api/runtime-identity` & Shutdown Bersih Frozen via `--job-host` (`instance f9230be4-532a-4b68-b25b-27baeaacd3b7`):** **`PASS` (`exit 0`)**:
+    - `GET http://127.0.0.1:3300/api/runtime-identity` (`x-podcut-ui-token`): **`200 OK`**, `build=phase3a`, `packaged=true`, `x-podcut-proxy-profile=installer-dev`, `run_id` cocok.
+    - `GET http://127.0.0.1:3300/api/health`: **`200 OK`**, `status=ok`, `ffmpeg=true`, `ffprobe=true`, **`youtube_ingest.enabled=true` & `available=true`** (membuktikan `yt-dlp` + `yt_dlp_ejs` aktif di dalam `PODCUTBackend.exe`), **`reframe.available=true` & `auto_face=true`** (membuktikan OpenCV + PySceneDetect + auto-seeded YuNet aktif di dalam `PODCUTBackend.exe`), `whisper_setup.state=missing` (wajar untuk profil kosong baru).
+    - `GET http://127.0.0.1:3300/`: **`200 OK`** (`29.555` byte); tanpa `x-podcut-ui-token` → **`403`**.
+    - Shutdown `{"op":"shutdown"}`: **`JOB_CLOSED={"event":"closed","active_processes":0,"clean":true}`**, **`HOST_EXIT=0`**, `PYCACHE=0`.
+- **Bukti lokal relatif:**
+  - `quality-upgrade/runs/1dfec1a0-005c-4af7-b09b-465c949c1857/PODCUTAI-InstallerDev/profiles/2e2a7e73-be9b-4b57-9d1e-637e168e3332/logs/desktop-7b186a0e-1209-4ab1-8c64-5be1448e3648/`
+  - `quality-upgrade/runs/1dfec1a0-005c-4af7-b09b-465c949c1857/PODCUTAI-InstallerDev/profiles/f9230be4-532a-4b68-b25b-27baeaacd3b7/`
+- **Satu langkah berikutnya (Menunggu Persetujuan):**
+  - Commit & push seluruh perbaikan **Stage 2D–2F** (`scripts/verify-phase2a-flow.py`, `scripts/build-quality-upgrade.ps1`, `docs/HANDOFF.md`) ke GitHub privat (`origin/main`) untuk menutup seluruh rangkaian migrasi Multi-PC Stage 2 secara lengkap dan tersinkron.
+
+---
+
+### Checkpoint Stage 2E — 21 November 2026 (PC B)
+
+- **Tujuan dan batas persetujuan:** Membangun paket desktop privat **Quality Upgrade** (Electron `45.3.4` + PyInstaller `6.22.3` + Next.js `16.4.6` standalone + FFmpeg `9.0.2`) di PC B lewat `scripts/build-quality-upgrade.ps1` ke direktori run UUID unik tanpa menjalankan executable paket baru, tanpa menyentuh paket historis Phase 3A/Quality V1, dan tanpa mengubah profil lama.
+- **Komputer dan agent:** PC B — Antigravity.
+- **Branch | SHA lokal | SHA remote:** `main` | `42373a28c15c3c3e3caa542cba15171c9a41f14b` *(+3 perubahan lokal belum di-commit: `scripts/verify-phase2a-flow.py`, `scripts/build-quality-upgrade.ps1`, `docs/HANDOFF.md`)* | `origin/main` `42373a28c15c3c3e3caa542cba15171c9a41f14b`.
+- **Perubahan source pada Stage 2E (2 file):**
+  - `scripts/build-quality-upgrade.ps1`: Memperbaiki kompatibilitas Windows PowerShell 5.1 pada `Invoke-BuildStep` (menyetel `$ErrorActionPreference = 'Continue'` hanya selama pemanggilan native executable dengan `*>` lalu mengembalikan `'Stop'` di blok `finally`, sambil tetap *fail-closed* bila `$exitCode -ne 0`). Percobaan awal (`ed92b2b0-0941-4d32-9da2-85638d97d306`) sebelumnya gagal pada baris `INFO:` pertama PyInstaller karena perlakuan PowerShell 5.1 terhadap stderr native. AST syntax check `0` error; SHA-256 `81f9e209d6c16b048ab180efab7e71109e78ea07c70955f956acb82beb0ab7a0`.
+  - `docs/HANDOFF.md`: Mencatat hasil Stage 2E.
+  - Catatan: `desktop/backend/PODCUTBackend.spec`, `desktop/build-desktop.mjs`, `desktop/app/boundaries.cjs`, dan `backend/app/runtime_profile.py` tidak diubah.
+- **Perintah dan hasil PASS / FAIL / NOT RUN:**
+  - `powershell.exe -NoProfile -File scripts/build-quality-upgrade.ps1`: **`BUILD PASS`** (`exit 0`, ~11 menit; run UUID `1dfec1a0-005c-4af7-b09b-465c949c1857`):
+    - `frontend-stage.log`, `next-build.log`, `pyinstaller.log`, `packaging.log`: seluruhnya **`PASS`**.
+    - Output paket: `quality-upgrade/runs/1dfec1a0-005c-4af7-b09b-465c949c1857/dist/PODCUTAI-InstallerDev-win32-x64` (`4.581` file, `1.098,64 MB` / `1.152.004.921` byte, `257` third-party notices, Electron fuses aktif, `no_installer=true`, `no_updater=true`).
+    - Audit manifest (`desktop-package-manifest.json`): `PODCUTAI-InstallerDev.exe` (`249,9 MB`), `resources/app.asar`, `PODCUTBackend.exe` (`24,8 MB`), `frontend/server.js`, `node/node.exe` (SHA-256 cocok `toolchain.lock.json`), `tools/ffmpeg.exe` & `ffprobe.exe`, `face_detection_yunet_2023mar.onnx` (SHA-256 cocok `8f2383e4...2fa4`), font `Poppins-SemiBold.ttf`/`Poppins-Bold.ttf`, `yt_dlp_ejs` (`core.min.js`/`lib.min.js`), `licenses/inventory.json` seluruhnya lengkap; **`0` kebocoran file `.env`**.
+    - Kebersihan workspace: `PYCACHE=0` di `backend/`, `quality-upgrade/runs/` ter-ignore penuh oleh Git.
+  - Eksekusi / uji runtime paket `.exe` hasil build baru: **`NOT RUN`** (menunggu persetujuan eksplisit; DEV Studio saat ini masih aktif di port `3300`/`8300` sehingga harus dimatikan dulu sebelum menjalankan paket desktop).
+- **Bukti lokal relatif:**
+  - `quality-upgrade/runs/1dfec1a0-005c-4af7-b09b-465c949c1857/desktop-package-manifest.json`
+  - `quality-upgrade/runs/1dfec1a0-005c-4af7-b09b-465c949c1857/packaging.log`
+  - `quality-upgrade/runs/1dfec1a0-005c-4af7-b09b-465c949c1857/dist/PODCUTAI-InstallerDev-win32-x64/PODCUTAI-InstallerDev.exe`
+- **Satu langkah berikutnya (Menunggu Persetujuan):**
+  - Pilih prioritas berikutnya: (1) **Commit & Push perubahan Stage 2D + 2E** (`scripts/verify-phase2a-flow.py`, `scripts/build-quality-upgrade.ps1`, `docs/HANDOFF.md`) ke GitHub privat, atau (2) **Stage 2F: Matikan DEV Studio lalu uji runtime paket `.exe` baru** memakai `--isolated-profile <uuid>` agar profil lama tidak tersentuh.
+
+---
+
+### Checkpoint Stage 2D — 21 November 2026 (PC B)
+
+- **Tujuan dan batas persetujuan:** Memporting `scripts/verify-phase2a-flow.py` agar bebas dari path hardcoded PC A, lalu menjalankan verifikasi integrasi end-to-end video sintetis penuh melawan Studio lokal `http://127.0.0.1:3300` (upload, transkrip, analisis klip heuristik, preview & ekspor MP4 vertikal Poppins Highlight + sidecar, ekspor original, range `206`, contact sheet visual), ditambah probe live **Auto-Face Reframe (YuNet 2023mar)** dan ekspor vertikal gabungan `reframe_id` + Poppins.
+- **Komputer dan agent:** PC B — Antigravity.
+- **Branch | SHA lokal | SHA remote:** `main` | `42373a28c15c3c3e3caa542cba15171c9a41f14b` *(+2 perubahan lokal belum di-commit: `scripts/verify-phase2a-flow.py`, `docs/HANDOFF.md`)* | `origin/main` `42373a28c15c3c3e3caa542cba15171c9a41f14b`.
+- **Perubahan source pada Stage 2D (2 file):**
+  - `scripts/verify-phase2a-flow.py`: Mengganti konstanta PC A (`D:/PODCUT-Labs/Installer-Dev` & `C:/Users/video/AppData/Local/PODCUTAI-InstallerDev`) dengan resolver fail-closed `_resolve_workspace()` berbasis `podcut-dev-workspace.json` (`PROJECT`, `PROJECT / '.dev' / 'profile'`). Syntax `ast.parse` OK; SHA-256 `2c306ca48f15699af24949eaada6493930f79f8de3998a40c137e9c30f794e67`.
+  - `docs/HANDOFF.md`: Mencatat sinkronisasi remote GitHub privat (`origin/main`) dan hasil penuh Stage 2D.
+  - Catatan pengaturan lokal `.dev/profile/` (di luar Git, atas persetujuan pengguna saat uji Studio interaktif): `YOUTUBE_INGEST_ENABLED=true` di `.dev/profile/config/backend.env` dan salinan lokal terverifikasi `face_detection_yunet_2023mar.onnx` (`8f2383e4...2fa4`) di `.dev/profile/models/reframe/`.
+- **Perintah dan hasil PASS / FAIL / NOT RUN:**
+  - `.venv\Scripts\python.exe -B scripts/verify-phase2a-flow.py`: **`35 / 35 CHECKS PASS`** (`exit 0`, ~9 detik; ID verifikasi `20261121T132344Z-63dec1b0b1`, project sintetis `268d720ff83e425bbf9e9542a3472d86`):
+    - Sumber sintetis `640x360` H.264/AAC `45,0s` (`13.648.833` byte) dibuat lewat `.tools/ffmpeg` & diverifikasi `.tools/ffprobe`.
+    - Upload lewat proxy `127.0.0.1:3300`, impor transkrip word-timestamp bahasa Indonesia, range playback `206`, analisis heuristik `duration_preset=20` (`2` kandidat utuh ≤ `20s`), dan cache reuse tanpa ASR ulang: **`PASS`**.
+    - Ekspor `vertical-poppins` (`1080x1920`, H.264/AAC, `3,0s`, `873.990` byte) + sidecar `.ass` (`Poppins SemiBold`, `#D7F35C`), `.srt`, `.vtt` + font independen + range `206`: **`PASS`**.
+    - Ekspor `original` (`640x360`, H.264/AAC, `3,0s`, `515.390` byte) + range `206`: **`PASS`**.
+    - Contact sheet visual (`contact-sheet.png`) terverifikasi menampilkan crop vertikal `1080x1920` dengan caption Poppins SemiBold & highlight lime `#D7F35C` (*"Ternyata kita tidak perlu"*).
+    - Isolasi filesystem & model cache sebelum/sesudah: **`PASS`** (`0` file baru di luar `.dev/profile/`, `0` `__pycache__` di `backend/`).
+  - Probe live **Auto-Face Reframe + Ekspor Gabungan** pada project `268d720ff83e425bbf9e9542a3472d86`: **`PASS`** (`POST /reframe/analyze` `mode=auto_face` → `HTTP 200`, OpenCV `4.14.0.94` + PySceneDetect `0.7.3` + YuNet `2023mar` memproses `9` sampel wajah, `1` shot, `2` keyframe, `plan_id=b154c216227ed75e0762eb5812028e26`; ekspor `vertical` gabungan `reframe_id` + `poppins_highlight` → `export_id=ff5de8e7a5fd4332b3da487a75586d84`, `1080x1920`, `status=ready`).
+- **Bukti lokal relatif:**
+  - `.dev/profile/runtime/phase2a/20261121T132344Z-63dec1b0b1/report.json`
+  - `.dev/profile/runtime/phase2a/20261121T132344Z-63dec1b0b1/contact-sheet.png`
+  - `.dev/profile/runtime/phase2a/20261121T132344Z-63dec1b0b1/vertical-poppins.mp4` & `original.mp4`
+- **Satu langkah berikutnya (Menunggu Persetujuan):**
+  - Commit & push perubahan Stage 2D (`scripts/verify-phase2a-flow.py` + `docs/HANDOFF.md`) ke GitHub privat, lalu lanjut ke **Stage 2E** (porting & build paket desktop `.exe` privat via `scripts/build-quality-upgrade.ps1`) atau langsung masuk fitur produk baru.
+
+---
 
 ### Checkpoint Git Lokal — 21 November 2026 (PC B)
 

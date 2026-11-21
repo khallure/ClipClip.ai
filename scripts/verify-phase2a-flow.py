@@ -20,8 +20,18 @@ import uuid
 from datetime import datetime, timezone
 
 
-PROJECT = Path('D:/PODCUT-Labs/Installer-Dev')
-PROFILE = Path('C:/Users/video/AppData/Local/PODCUTAI-InstallerDev')
+def _resolve_workspace() -> tuple[Path, Path]:
+    project = Path(__file__).resolve().parents[1]
+    marker = project / 'podcut-dev-workspace.json'
+    if not marker.is_file() or marker.stat().st_size > 16384:
+        raise RuntimeError('Multi-PC workspace marker is missing or invalid.')
+    data = json.loads(marker.read_text(encoding='utf-8'))
+    if not isinstance(data, dict) or data.get('schema') != 1 or data.get('kind') != 'podcut-multipc-dev':
+        raise RuntimeError('Verification requires the Multi-PC source checkout.')
+    return project, project / '.dev' / 'profile'
+
+
+PROJECT, PROFILE = _resolve_workspace()
 BASE_URL = 'http://127.0.0.1:3300'
 
 
