@@ -336,7 +336,7 @@ def to_ass(document: dict) -> str:
     ass_size = css_size * metrics.ass_scale
     family = 'Poppins SemiBold' if settings['font_weight'] == 600 else 'Poppins'
     header = f'''[Script Info]
-; PODCUT AI Poppins Highlight - original dialogue and word timings retained.
+; ClipClip.ai Poppins Highlight - original dialogue and word timings retained.
 ScriptType: v4.00+
 PlayResX: {width}
 PlayResY: {height}

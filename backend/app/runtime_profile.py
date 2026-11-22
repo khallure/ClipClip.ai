@@ -31,7 +31,7 @@ PROFILE_ID = 'installer-dev'
 PROTOCOL = 'podcut-installer-dev-v1'
 BUILD = 'phase2a'
 PACKAGE_BUILD = 'phase3a'
-APP_DIRECTORY = 'PODCUTAI-InstallerDev'
+APP_DIRECTORY = 'ClipClip.ai'
 YUNET_NAME = 'face_detection_yunet_2023mar.onnx'
 YUNET_SHA256 = '8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4'
 SETTING_NAMES = frozenset({'MAX_UPLOAD_MB', 'STORAGE_LIMIT_GB', 'MAX_DURATION_HOURS', 'WHISPER_MODEL',
@@ -322,7 +322,7 @@ class RuntimeProfile:
         if target.exists():
             return
         temporary = self.validate_writable(target.with_name('backend.env.seed-' + uuid.uuid4().hex + '.tmp'))
-        content = '# PODCUT private user settings. API keys are optional.\n' + ''.join(
+        content = '# ClipClip.ai private user settings. API keys are optional.\n' + ''.join(
             key + '=' + value + '\n' for key, value in DEFAULT_SETTINGS.items())
         try:
             with temporary.open('x', encoding='utf-8', newline='\n') as stream:

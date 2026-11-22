@@ -92,6 +92,6 @@ export function ModelSetup({ onReady }: { onReady: () => void }) {
       <button className="button secondary" disabled={!!working || pending} onClick={() => offlineInput.current?.click()}><UploadCloud size={16} />Impor paket offline ZIP</button>
       <input ref={offlineInput} type="file" accept=".zip,application/zip" hidden onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void importOffline(file); }} />
     </div>
-    <p className={styles.note}>Tidak ada internet? Gunakan ZIP dari tombol “Simpan paket model offline” pada PODCUT yang modelnya sudah siap. Ukuran, versi, dan SHA256 setiap file diperiksa sebelum transkripsi diaktifkan.</p>
+    <p className={styles.note}>Tidak ada internet? Gunakan ZIP dari tombol “Simpan paket model offline” pada ClipClip.ai yang modelnya sudah siap. Ukuran, versi, dan SHA256 setiap file diperiksa sebelum transkripsi diaktifkan.</p>
   </section>;
 }

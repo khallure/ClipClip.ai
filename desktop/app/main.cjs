@@ -24,7 +24,7 @@ function nativeBootstrap() {
     cwd: path.join(packageRoot, 'backend'), env: inherited, windowsHide: true, shell: false,
     encoding: 'utf8', timeout: 20000, maxBuffer: 32768,
   });
-  if (response.error || response.status !== 0) throw new Error('Runtime PODCUT tidak lengkap atau lokasi profil tidak aman. Gunakan folder paket utuh.');
+  if (response.error || response.status !== 0) throw new Error('Runtime ClipClip.ai tidak lengkap atau lokasi profil tidak aman. Gunakan folder paket utuh.');
   let record;
   try { record = JSON.parse(response.stdout); } catch { throw new Error('Native runtime bootstrap returned an invalid identity.'); }
   const boundary = createBoundaries(record, packageRoot);
@@ -96,7 +96,7 @@ async function verifyBothListeners() {
 async function available(port) {
   await new Promise((resolve, reject) => {
     const probe = net.createServer();
-    probe.once('error', () => reject(new Error(`Port development ${port} sedang dipakai. Tutup instance DEV yang memakainya; PODCUT tidak akan menghentikan proses lain.`)));
+    probe.once('error', () => reject(new Error(`Port lokal ${port} sedang dipakai. Tutup instance lain yang memakainya; ClipClip.ai tidak akan menghentikan proses lain.`)));
     probe.listen({ host: '127.0.0.1', port, exclusive: true }, () => probe.close(resolve));
   });
 }
@@ -115,7 +115,7 @@ async function ready(url, headers, packageRoot, frontend = false) {
     } catch { /* A bounded retry is allowed only while our own supervisor lives. */ }
     await new Promise(resolve => setTimeout(resolve, 200));
   }
-  throw new Error('Service PODCUT development belum siap. Lihat log desktop pada profil development.');
+  throw new Error('Service ClipClip.ai belum siap. Lihat log desktop pada profil aplikasi.');
 }
 
 async function shutdown() {
@@ -163,7 +163,7 @@ async function startSupervisor(packageRoot, token) {
     log(`Supervisor exited code=${code} signal=${signal || 'none'}.`);
     for (const waiter of pending.values()) waiter.reject(new Error('The bundled process supervisor stopped.'));
     pending.clear();
-    if (!shutdownPromise && mainWindow) { dialog.showErrorBox('PODCUT Installer DEV', 'Service lokal berhenti. Buka ulang aplikasi DEV dan periksa log.'); app.quit(); }
+    if (!shutdownPromise && mainWindow) { dialog.showErrorBox('ClipClip.ai', 'Service lokal berhenti. Buka ulang ClipClip.ai dan periksa log.'); app.quit(); }
   });
   host.stderr.on('data', data => {
     // Supervisor errors are deliberately fixed messages; no command/environment dump.
@@ -210,7 +210,7 @@ function browser(token) {
   browserSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
   browserSession.setPermissionCheckHandler(() => false);
   mainWindow = new BrowserWindow({ width: 1450, height: 960, minWidth: 980, minHeight: 700,
-    show: false, title: 'PODCUT AI — Installer Development', autoHideMenuBar: true,
+    show: false, title: 'ClipClip.ai — Studio Klip Podcast', icon: path.join(__dirname, 'icon.png'), autoHideMenuBar: true,
     webPreferences: { session: browserSession, sandbox: true, nodeIntegration: false,
       contextIsolation: true, webSecurity: true, devTools: false, spellcheck: false,
       allowRunningInsecureContent: false, navigateOnDragDrop: false },
@@ -239,7 +239,7 @@ function browser(token) {
   mainWindow.webContents.on('will-attach-webview', event => event.preventDefault());
   mainWindow.webContents.on('will-navigate', (event, url) => { if (!isLocalUi(url)) event.preventDefault(); });
   mainWindow.webContents.on('will-redirect', (event, url) => { if (!isLocalUi(url)) event.preventDefault(); });
-  mainWindow.on('page-title-updated', event => { event.preventDefault(); mainWindow.setTitle('PODCUT AI — Installer Development'); });
+  mainWindow.on('page-title-updated', event => { event.preventDefault(); mainWindow.setTitle('ClipClip.ai — Studio Klip Podcast'); });
   mainWindow.webContents.on('render-process-gone', () => app.quit());
   mainWindow.on('closed', () => { mainWindow = null; });
   mainWindow.once('ready-to-show', () => mainWindow.show());
@@ -268,7 +268,7 @@ try {
   app.commandLine.appendSwitch('disk-cache-dir', directory(path.join(PROFILE, 'cache/electron-http')));
   app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
   app.commandLine.appendSwitch('user-data-dir', app.getPath('userData'));
-  app.setAppUserModelId('local.podcutai.installerdev');
+  app.setAppUserModelId('ai.clipclip.desktop');
   if (!app.requestSingleInstanceLock()) app.exit(0);
   else {
     app.on('second-instance', () => { if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.show(); mainWindow.focus(); } });
@@ -302,11 +302,11 @@ try {
     }).catch(async error => {
       log(`Startup failed: ${error.message}`);
       await shutdown();
-      dialog.showErrorBox('PODCUT Installer DEV', `${error.message}\n\nOriginal tidak dihentikan. Log DEV: ${path.join(PROFILE, 'logs')}`);
+      dialog.showErrorBox('ClipClip.ai', `${error.message}\n\nAplikasi lain tidak dihentikan. Log: ${path.join(PROFILE, 'logs')}`);
       allowQuit = true; app.quit();
     });
   }
 } catch (error) {
-  dialog.showErrorBox('PODCUT Installer DEV', error.message);
+  dialog.showErrorBox('ClipClip.ai', error.message);
   app.exit(1);
 }

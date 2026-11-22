@@ -6,7 +6,7 @@ const crypto = require('node:crypto');
 
 const FRONTEND = 'http://127.0.0.1:3300';
 const BACKEND = 'http://127.0.0.1:8300';
-const APP_NAME = 'PODCUTAI-InstallerDev';
+const APP_NAME = 'ClipClip.ai';
 const BUILD = 'phase3a';
 const UUID = /^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/;
 
@@ -55,7 +55,7 @@ function readPackage(resourcesPath, executable) {
   }
   if (path.dirname(shell).toLowerCase() !== path.dirname(resourcesPath).toLowerCase() ||
       path.basename(shell).toLowerCase() !== `${APP_NAME}.exe`.toLowerCase()) {
-    throw new Error('Run the packaged PODCUTAI-InstallerDev executable from its own desktop package.');
+    throw new Error('Run the packaged ClipClip.ai executable from its own desktop package.');
   }
   const markerPath = checkedPath(path.join(root, 'podcut-package.json'), root);
   if (fs.statSync(markerPath).size > 16384) throw new Error('The desktop package marker is too large.');
@@ -166,7 +166,7 @@ function isLocalUi(url) {
 }
 
 function safeDownload(root, requestedName) {
-  const name = path.basename(requestedName || 'podcut-download.mp4').replace(/[^A-Za-z\d._-]/g, '_').slice(-120);
+  const name = path.basename(requestedName || 'clipclip-download.mp4').replace(/[^A-Za-z\d._-]/g, '_').slice(-120);
   return checkedPath(path.join(root, `${crypto.randomUUID()}-${name}`), PROFILE);
 }
 

@@ -184,7 +184,7 @@ def test_quality_upgrade_qa_profile_is_dynamic_and_isolated_from_installed_profi
     installed_exe = (
         tmp_path
         / 'Installed Phase 3A'
-        / 'PODCUTAI-InstallerDev-win32-x64'
+        / 'ClipClip.ai-win32-x64'
         / 'resources'
         / 'podcut'
         / 'backend'

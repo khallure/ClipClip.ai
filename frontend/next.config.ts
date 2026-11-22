@@ -8,7 +8,7 @@ const config: NextConfig = {
   cacheMaxMemorySize: 0,
   images: { unoptimized: true },
   outputFileTracingExcludes: {
-    "/*": [".env", ".env.*", "**/PODCUTAI-InstallerDev/**"],
+    "/*": [".env", ".env.*", "**/PODCUTAI-InstallerDev/**", "**/ClipClip.ai/**"],
   },
 };
 export default config;

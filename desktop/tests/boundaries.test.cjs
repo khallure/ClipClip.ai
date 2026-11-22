@@ -14,7 +14,7 @@ const boundary = portable.createBoundaries({schema:1,profile_id:'installer-dev',
   windows_root:process.env.SystemRoot}, PACKAGE_ROOT);
 
 test('path guards reject foreign writable roots, sibling-prefix escapes and relative paths', () => {
-  for (const candidate of ['C:\\PODCUTAI-InstallerDev-Escape\\data', `${boundary.PROFILE}-other\\data`,
+  for (const candidate of [`C:\\${portable.APP_NAME}-Escape\\data`, `${boundary.PROFILE}-other\\data`,
     path.join(boundary.PROFILE, '..', 'outside'), 'relative/data']) {
     assert.throws(() => boundary.checkedPath(candidate, boundary.PROFILE));
   }
@@ -83,7 +83,7 @@ test('desktop package validation requires real bundled artifacts and compatible 
   try {
     const resources = path.join(root, 'resources');
     const payload = boundary.directory(path.join(resources, 'podcut'), boundary.PROJECT);
-    const exe = path.join(root, 'PODCUTAI-InstallerDev.exe');
+    const exe = path.join(root, `${portable.APP_NAME}.exe`);
     fs.writeFileSync(exe, 'fixture');
     const marker = { schema: 1, profile_id: 'installer-dev', build: 'phase3a', backend: 'backend/PODCUTBackend.exe',
       frontend: 'frontend/server.js', node: 'node/node.exe' };

@@ -57,7 +57,7 @@ function stripDotenvFiles(root) {
 }
 
 const outputRoot = directory(quality ? path.join(run, 'dist') : path.join(desktopRoot, 'dist/phase3a'), PROJECT);
-const output = checkedPath(path.join(outputRoot, 'PODCUTAI-InstallerDev-win32-x64'), PROJECT);
+const output = checkedPath(path.join(outputRoot, 'ClipClip.ai-win32-x64'), PROJECT);
 if (fs.existsSync(output)) throw new Error('Desktop output already exists. Preserve it explicitly before a separate packaging run; this script never overwrites a package.');
 const stagedRoot = directory(quality ? path.join(run, 'staging') : path.join(desktopRoot, 'staging'), PROJECT);
 const staged = directory(path.join(stagedRoot, `${quality ? 'quality' : 'phase3a'}-${crypto.randomUUID()}`), PROJECT);
@@ -73,6 +73,7 @@ guardTree(standalone);
 guardTree(backend);
 
 for (const name of ['main.cjs', 'boundaries.cjs', 'private-http.cjs', 'package.json']) copy(path.join(desktopRoot, 'app', name), path.join(appStage, name));
+copy(requiredFile(path.join(desktopRoot, 'assets', 'icon.png')), path.join(appStage, 'icon.png'));
 copy(backend, path.join(payload, 'backend'));
 copy(standalone, path.join(payload, 'frontend'));
 const front = path.join(payload, 'frontend');
@@ -97,22 +98,23 @@ fs.writeFileSync(path.join(payload, 'podcut-package.json'), JSON.stringify({ sch
   ...(quality ? { edition: 'quality-upgrade' } : {}),
   ffmpeg: 'tools/ffmpeg.exe', ffprobe: 'tools/ffprobe.exe', no_installer: true, no_updater: true }, null, 2));
 fs.writeFileSync(path.join(payload, 'PRIVATE-DEVELOPMENT-BUILD.txt'),
-  `Private ${quality ? 'Quality Upgrade' : 'Phase 3A'} test package. No installer or updater. Bundled FFmpeg and PyAV codec libraries require corresponding-source/license review before redistribution. User/model data lives outside the program directory.\n`);
+  `ClipClip.ai private ${quality ? 'Quality Upgrade' : 'Phase 3A'} desktop build. Bundled FFmpeg and PyAV codec libraries require corresponding-source/license review before public redistribution. User/model data lives outside the program directory.\n`);
 console.log(`Retained third-party notices: ${collectLicenseNotices(payload)}`);
 
 const scratch = run || PROFILE;
 const temporaryRoot = directory(path.join(scratch, 'temp/electron-packager'), scratch);
 const electronCache = directory(path.join(scratch, 'cache/electron'), scratch);
-const packages = await packager({ dir: appStage, name: 'PODCUTAI-InstallerDev', executableName: 'PODCUTAI-InstallerDev',
+const packages = await packager({ dir: appStage, name: 'ClipClip.ai', executableName: 'ClipClip.ai',
+  icon: requiredFile(path.join(desktopRoot, 'assets', 'icon.ico')),
   out: outputRoot, platform: 'win32', arch: 'x64', electronVersion: '45.3.4', asar: true,
   ...(quality ? { electronZipDir: checkedPath(path.join(run, 'work/electron-zip'), run) } : {}),
   overwrite: false, prune: false, derefSymlinks: false, extraResource: [payload], tmpdir: temporaryRoot,
   download: { cacheRoot: electronCache }, appVersion: '1.0.0', buildVersion: '1.0.0',
-  win32metadata: { CompanyName: 'PODCUT AI Development', ProductName: 'PODCUTAI-InstallerDev',
-    FileDescription: 'PODCUT AI private desktop development package' },
+  win32metadata: { CompanyName: 'ClipClip.ai', ProductName: 'ClipClip.ai',
+    FileDescription: 'ClipClip.ai — Studio Klip Podcast Lokal' },
 });
 if (packages.length !== 1 || path.resolve(packages[0]) !== output) throw new Error('Packager produced an unexpected output directory.');
-const executable = requiredFile(path.join(output, 'PODCUTAI-InstallerDev.exe'));
+const executable = requiredFile(path.join(output, 'ClipClip.ai.exe'));
 await flipFuses(executable, { version: FuseVersion.V1,
   [FuseV1Options.RunAsNode]: false, [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
   [FuseV1Options.EnableNodeCliInspectArguments]: false, [FuseV1Options.OnlyLoadAppFromAsar]: true,

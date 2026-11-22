@@ -115,4 +115,4 @@ try {
         (Join-Path $Project 'desktop\backend\PODCUTBackend.spec')) 'pyinstaller.log'
     Invoke-BuildStep $node @((Join-Path $Project 'desktop\build-desktop.mjs'),'--quality-upgrade',$BuildId) 'packaging.log'
 } finally { Pop-Location }
-Write-Host ('Build tersedia di ' + (Join-Path $Run 'dist\PODCUTAI-InstallerDev-win32-x64'))
+Write-Host ('Build tersedia di ' + (Join-Path $Run 'dist\ClipClip.ai-win32-x64'))

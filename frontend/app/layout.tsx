@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PODCUT AI — Studio Klip Podcast",
+  title: "ClipClip.ai — Studio Klip Podcast",
   description: "Temukan bagian terbaik podcast, rapikan subtitle Poppins, dan unduh klip MP4 berkualitas tinggi di komputer Anda.",
 };
 

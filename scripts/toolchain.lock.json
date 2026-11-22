@@ -144,6 +144,25 @@
       "hooks_contrib_sha256": "dfc3cde20a7ce6c92e803016e66eed4b7050467e2c5f886a3745d89b258c6d6d",
       "status": "VERIFIED",
       "notes": "Verified SHA-256 from scripts/requirements-windows-cp312.lock.txt; installed into .venv via pip --require-hashes."
+    },
+    "inno_setup": {
+      "version": "7.1.1",
+      "platform": "win32",
+      "arch": "x64",
+      "publisher": "Jordan Russell (jrsoftware/issrc)",
+      "license": "Inno Setup License",
+      "archive": "innosetup-7.1.1-x64.exe",
+      "archive_format": "inno-portable-exe",
+      "bytes": 14336568,
+      "download_path": ".tools/downloads/innosetup-7.1.1-x64.exe",
+      "install_dir": ".tools/inno",
+      "executable": ".tools/inno/ISCC.exe",
+      "executable_sha256": "e0f9f1dc32032650c6629f6dee41eb6d20ba140e4e3c07c25d8a24f9ba781644",
+      "source_url": "https://github.com/jrsoftware/issrc/releases/download/is-7_1_1/innosetup-7.1.1-x64.exe",
+      "checksums_url": "https://github.com/jrsoftware/issrc/releases/tag/is-7_1_1",
+      "sha256": "8a5a6711c3766a6e5fb74f280ba0e3551e719ce94538d901fdbd1f8f9920b3f0",
+      "status": "VERIFIED",
+      "notes": "Official jrsoftware/issrc Inno Setup 7.1.1 native x64 compiler unpacked with /PORTABLE=1 /CURRENTUSER /VERYSILENT /NOICONS into .tools/inno with zero Windows Registry entries."
     }
   }
 }

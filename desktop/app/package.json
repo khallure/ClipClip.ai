@@ -1,8 +1,8 @@
 {
-  "name": "podcut-ai-installer-dev",
-  "productName": "PODCUTAI-InstallerDev",
+  "name": "clipclip-ai",
+  "productName": "ClipClip.ai",
   "version": "1.0.0",
   "private": true,
   "main": "main.cjs",
-  "description": "PODCUT AI private desktop development package"
+  "description": "ClipClip.ai — Studio Klip Podcast Lokal"
 }

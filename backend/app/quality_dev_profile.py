@@ -16,7 +16,7 @@ RUNS_DIRECTORY = ('quality-upgrade', 'runs')
 WORKSPACE_MARKER = 'podcut-dev-workspace.json'
 WORKSPACE_KIND = 'podcut-multipc-dev'
 EXECUTABLE_LAYOUT = (
-    'dist', 'PODCUTAI-InstallerDev-win32-x64', 'resources', 'podcut', 'backend', 'PODCUTBackend.exe',
+    'dist', 'ClipClip.ai-win32-x64', 'resources', 'podcut', 'backend', 'PODCUTBackend.exe',
 )
 
 

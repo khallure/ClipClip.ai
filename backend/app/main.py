@@ -483,7 +483,7 @@ def create_app(data_dir: Path | None = None):
             model_manager.close()
         pipeline.close()
 
-    app = FastAPI(title='PODCUT AI', version='0.1.0', lifespan=lifespan)
+    app = FastAPI(title='ClipClip.ai', version='1.0.0', lifespan=lifespan)
     app.state.store, app.state.pipeline = store, pipeline
     register_model_routes(app, models)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', 'testserver'])
@@ -916,7 +916,7 @@ def create_app(data_dir: Path | None = None):
 
     @app.get('/api/jobs/{ident}/exports/{export_id}/file')
     def download(ident: str, export_id: str):
-        return FileResponse(export_file(ident, export_id, 'clip.mp4'), media_type='video/mp4', filename=f'podcut-{ident[:8]}-{export_id[:8]}.mp4')
+        return FileResponse(export_file(ident, export_id, 'clip.mp4'), media_type='video/mp4', filename=f'clipclip-{ident[:8]}-{export_id[:8]}.mp4')
 
     @app.get('/api/jobs/{ident}/exports/{export_id}/captions.srt')
     def srt(ident: str, export_id: str):

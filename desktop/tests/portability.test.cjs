@@ -48,8 +48,8 @@ test('bootstrap cannot select arbitrary roots, foreign package identity, or over
   const packageRoot=path.join(PROJECT,'portable QA','resources/podcut'), record=info(packageRoot);
   for(const changes of [{build:'phase2b'},{project_root:PROJECT},{profile_root:path.join(PACKAGED_PROFILE,'other')},
     {profile_instance:'../escape'},{profile_instance:crypto.randomUUID()},
-    {profile_root:path.join(packageRoot,'PODCUTAI-InstallerDev')},
-    {profile_root:'\\\\server\\share\\PODCUTAI-InstallerDev'}]) {
+    {profile_root:path.join(packageRoot,APP_NAME)},
+    {profile_root:`\\\\server\\share\\${APP_NAME}`}]) {
     assert.throws(()=>createBoundaries({...record,...changes},packageRoot));
   }
 });

@@ -233,7 +233,7 @@ def main() -> int:
         with httpx.Client(base_url=BASE_URL, trust_env=False, follow_redirects=False,
                           headers={'Origin': BASE_URL}, timeout=httpx.Timeout(90, connect=5)) as client:
             home = request(client, 'GET', '/')
-            check('real frontend is served on port 3300', 'text/html' in home.headers.get('content-type', '') and 'PODCUT' in home.text.upper())
+            check('real frontend is served on port 3300', 'text/html' in home.headers.get('content-type', '') and ('CLIPCLIP' in home.text.upper() or 'PODCUT' in home.text.upper()))
             health_response = request(client, 'GET', '/api/health')
             health = health_response.json()
             identity = health.get('instance', {})

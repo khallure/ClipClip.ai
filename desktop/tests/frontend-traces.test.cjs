@@ -10,7 +10,8 @@ const root = path.join(PROJECT, 'frontend');
 const manifest = path.join(root, '.next/server/app/api/[...path]/route.js.nft.json');
 
 test('trace validation rejects profile assets, dotenv and malformed drive paths', () => {
-  for (const file of ['../../../../../C:/Users/synthetic-user/AppData/Local/PODCUTAI-InstallerDev/data/project.json',
+  for (const file of ['../../../../../C:/Users/synthetic-user/AppData/Local/ClipClip.ai/data/project.json',
+    'C:/Users/synthetic-user/AppData/Local/ClipClip.ai/config/backend.env',
     'C:/Users/synthetic-user/AppData/Local/PODCUTAI-InstallerDev/config/backend.env',
     '../../../../../../../backend/.env', '../../../../../../.env.local',
     '\\\\server\\share\\private.json']) assert.throws(() => validateTraceFiles(manifest, [file], root));
