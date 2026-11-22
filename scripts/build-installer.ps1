@@ -130,8 +130,9 @@ $manifestObj = [ordered]@{
     notice = 'Unsigned private Windows installer build. Bundled FFmpeg/PyAV codec libraries require license review before public redistribution.'
 }
 
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 $manifestPath = Resolve-InstallerPath (Join-Path $installerDir 'installer-manifest.json')
-$manifestObj | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
+[IO.File]::WriteAllText($manifestPath, (($manifestObj | ConvertTo-Json -Depth 6) + "`n"), $utf8NoBom)
 
 $resolvedDownloadUrl = if ($DownloadUrl) { $DownloadUrl.Trim() } else { "https://github.com/khallure/ClipClip.ai/releases/download/v$AppVersion/$($installerInfo.Name)" }
 $latestObj = [ordered]@{
@@ -150,7 +151,7 @@ $latestObj = [ordered]@{
     }
 }
 $latestPath = Resolve-InstallerPath (Join-Path $installerDir 'latest.json')
-$latestObj | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $latestPath -Encoding UTF8
+[IO.File]::WriteAllText($latestPath, (($latestObj | ConvertTo-Json -Depth 6) + "`n"), $utf8NoBom)
 
 Write-Host ('Installer siap: ' + $installerExe) -ForegroundColor Green
 Write-Host ('Manifest update: ' + $latestPath) -ForegroundColor Green

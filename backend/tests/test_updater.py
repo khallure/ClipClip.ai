@@ -533,3 +533,13 @@ def test_fastapi_update_routes_and_health_expose_app_version_without_network(tmp
 
         check = client.post('/api/updates/check')
         assert check.status_code == 409
+
+
+def test_parse_release_manifest_accepts_utf8_bom():
+    payload = b'MZ' + b'B' * 1024
+    raw_manifest, _ = _make_manifest('1.0.9', payload)
+    bom_manifest = b'\xef\xbb\xbf' + raw_manifest
+    parsed = updater.parse_release_manifest(bom_manifest, min_installer_bytes=128)
+    assert parsed['version'] == '1.0.9'
+    assert parsed['installer']['bytes'] == len(payload)
+    assert parsed['installer']['sha256'] == hashlib.sha256(payload).hexdigest()

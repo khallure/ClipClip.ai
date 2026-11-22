@@ -130,7 +130,7 @@ def parse_release_manifest(
     if not raw or len(raw) > MANIFEST_MAX_BYTES:
         raise UpdateError('Manifest update (latest.json) kosong atau terlalu besar.', code='invalid_manifest')
     try:
-        data = json.loads(raw.decode('utf-8'))
+        data = json.loads(raw.decode('utf-8-sig'))
     except (UnicodeDecodeError, ValueError):
         raise UpdateError('Manifest update (latest.json) bukan JSON yang valid.', code='invalid_manifest') from None
     if not isinstance(data, dict):
@@ -413,7 +413,7 @@ class AppUpdater:
                 allow_github_auth=True,
             )
             try:
-                release = json.loads(release_raw.decode('utf-8'))
+                release = json.loads(release_raw.decode('utf-8-sig'))
             except (UnicodeDecodeError, ValueError):
                 raise UpdateError('Respons GitHub Releases tidak valid.', code='invalid_manifest', status_code=502) from None
             assets = release.get('assets') if isinstance(release, dict) else None
