@@ -25,6 +25,8 @@ from .captions import build_caption_document
 from .ingestion import VideoSourceIngestor
 from .source_progress import fresh_progress, update_progress
 from .model_provisioning import create_provisioner, register_model_routes, load_manifest
+from .updater import create_updater, register_update_routes
+from .version import APP_VERSION
 from .reframe_models import ReframeInterval, ReframeRequest, ReframePlan
 from . import reframe_store
 from .store import ACTIVE, JobStore, now
@@ -467,6 +469,8 @@ def create_app(data_dir: Path | None = None):
     pipeline = Pipeline(store)
     model_manager = None
     model_lock = threading.Lock()
+    update_manager = None
+    update_lock = threading.Lock()
 
     def models():
         nonlocal model_manager
@@ -475,17 +479,27 @@ def create_app(data_dir: Path | None = None):
                 model_manager = create_provisioner()
             return model_manager
 
+    def updater():
+        nonlocal update_manager
+        with update_lock:
+            if update_manager is None:
+                update_manager = create_updater()
+            return update_manager
+
     @asynccontextmanager
     async def lifespan(app):
         pipeline.start()
         yield
+        if update_manager is not None:
+            update_manager.close()
         if model_manager is not None:
             model_manager.close()
         pipeline.close()
 
-    app = FastAPI(title='ClipClip.ai', version='1.0.0', lifespan=lifespan)
+    app = FastAPI(title='ClipClip.ai', version=APP_VERSION, lifespan=lifespan)
     app.state.store, app.state.pipeline = store, pipeline
     register_model_routes(app, models)
+    register_update_routes(app, updater)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', 'testserver'])
 
     @app.middleware('http')
@@ -549,6 +563,8 @@ def create_app(data_dir: Path | None = None):
                 'whisper_model': config.WHISPER_MODEL, 'max_upload_mb': config.MAX_UPLOAD_MB,
                 'storage_limit_gb': config.STORAGE_LIMIT_GB, 'youtube_ingest': pipeline.ingestor.capabilities(),
                 'reframe': reframe_capabilities(),
+                'app_version': APP_VERSION,
+                'updates': updater().status(),
                 'gemini': ai['provider'] == 'gemini' and ai['configured'], 'ai': ai}
 
     @app.get('/api/jobs')

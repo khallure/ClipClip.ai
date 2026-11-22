@@ -32,6 +32,31 @@ export type Job = {
   auto_export?: { status: "queued" | "processing" | "ready" | "skipped" | "failed"; export_id?: string; message?: string } | null;
   reframe?: { status: "queued" | "processing" | "ready" | "failed" | "cancelled"; id?: string; start: number; end: number; message?: string } | null;
 };
-export type Health = { status: string; ffmpeg: boolean; ffprobe: boolean; whisper: boolean; openai: boolean; gemini?: boolean; ai?: { provider: AIProvider; configured: boolean; model: string; status?: string }; reframe?: {available:boolean;manual:boolean;auto_face:boolean;active_speaker:boolean;device:string;reason?:string}; whisper_model: string; max_upload_mb: number; storage_limit_gb: number; youtube_ingest?: {enabled:boolean;available:boolean;reason:string} };
+export type UpdateStatus = {
+  current_version: string;
+  configured: boolean;
+  feed_kind: "none" | "github_releases" | "direct_manifest";
+  feed_host: string;
+  auto_check: boolean;
+  token_configured: boolean;
+  packaged: boolean;
+  can_install: boolean;
+  state: "unconfigured" | "idle" | "checking" | "up_to_date" | "available" | "downloading" | "verifying" | "ready_to_install" | "installing" | "failed" | "cancelled";
+  available_version: string | null;
+  published_at: string | null;
+  release_notes: string;
+  filename: string | null;
+  total_bytes: number;
+  received_bytes: number;
+  percent: number;
+  speed_bps: number | null;
+  expected_sha256: string | null;
+  verified_sha256: string | null;
+  verified: boolean;
+  checked_at: string | null;
+  message: string;
+  error_code: string | null;
+};
+export type Health = { status: string; ffmpeg: boolean; ffprobe: boolean; whisper: boolean; openai: boolean; gemini?: boolean; ai?: { provider: AIProvider; configured: boolean; model: string; status?: string }; reframe?: {available:boolean;manual:boolean;auto_face:boolean;active_speaker:boolean;device:string;reason?:string}; whisper_model: string; max_upload_mb: number; storage_limit_gb: number; youtube_ingest?: {enabled:boolean;available:boolean;reason:string}; app_version?: string; updates?: UpdateStatus };
 
 export const activeStatuses = new Set(["queued", "probing", "transcribing", "analyzing", "exporting", "validating", "getting_metadata", "retrieving_source", "merging_media", "verifying_media", "reframing"]);

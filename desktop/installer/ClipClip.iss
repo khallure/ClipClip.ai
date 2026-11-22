@@ -59,3 +59,10 @@ Name: "{autodesktop}\ClipClip.ai"; Filename: "{app}\ClipClip.ai.exe"; IconFilena
 
 [Run]
 Filename: "{app}\ClipClip.ai.exe"; Description: "{cm:LaunchProgram,ClipClip.ai}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\ClipClip.ai.exe"; Flags: nowait postinstall; Check: ShouldRelaunchAfterSilentUpdate
+
+[Code]
+function ShouldRelaunchAfterSilentUpdate(): Boolean;
+begin
+  Result := WizardSilent and (ExpandConstant('{param:RELAUNCH|0}') = '1');
+end;

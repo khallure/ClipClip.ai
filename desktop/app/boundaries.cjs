@@ -9,6 +9,73 @@ const BACKEND = 'http://127.0.0.1:8300';
 const APP_NAME = 'ClipClip.ai';
 const BUILD = 'phase3a';
 const UUID = /^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/;
+const SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
+const SHA256_HEX = /^[a-f0-9]{64}$/;
+const INSTALLER_FILE = /^ClipClip\.ai-Setup-(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)-x64\.exe$/;
+const MAX_INSTALLER_BYTES = 2 * 1024 * 1024 * 1024;
+
+function parseSemver(value) {
+  if (typeof value !== 'string') throw new Error('Invalid semantic version.');
+  const match = SEMVER.exec(value.trim());
+  if (!match) throw new Error('Version must use x.y.z format.');
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function isNewerVersion(remote, current) {
+  const a = parseSemver(remote);
+  const b = parseSemver(current);
+  for (let i = 0; i < 3; i++) {
+    if (a[i] !== b[i]) return a[i] > b[i];
+  }
+  return false;
+}
+
+function verifyFileSha256(filePath, expectedSha256) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256');
+    const stream = fs.createReadStream(filePath);
+    stream.on('error', reject);
+    stream.on('data', chunk => hash.update(chunk));
+    stream.on('end', () => {
+      const actual = hash.digest('hex');
+      if (actual !== expectedSha256) reject(new Error('Update installer SHA-256 verification failed.'));
+      else resolve(actual);
+    });
+  });
+}
+
+async function validatePendingUpdate(record, { profileRoot, runId, currentVersion, minBytes = 1048576 }) {
+  if (!record || typeof record !== 'object' || record.schema !== 1 || record.product !== APP_NAME) {
+    throw new Error('Pending update record does not identify ClipClip.ai.');
+  }
+  if (!UUID.test(runId || '') || record.run_id !== runId) {
+    throw new Error('Pending update run identity does not match this desktop session.');
+  }
+  if (record.current_version !== currentVersion || !isNewerVersion(record.version, currentVersion)) {
+    throw new Error('Pending update version is invalid or not newer than the installed version.');
+  }
+  const expectedName = `ClipClip.ai-Setup-${record.version}-x64.exe`;
+  if (typeof record.filename !== 'string' || !INSTALLER_FILE.test(record.filename) || record.filename !== expectedName) {
+    throw new Error('Pending update installer filename is invalid.');
+  }
+  if (!Number.isSafeInteger(record.bytes) || record.bytes < minBytes || record.bytes > MAX_INSTALLER_BYTES) {
+    throw new Error('Pending update installer size is outside safe limits.');
+  }
+  if (typeof record.sha256 !== 'string' || !SHA256_HEX.test(record.sha256)) {
+    throw new Error('Pending update SHA-256 digest is invalid.');
+  }
+  const expectedPath = checkedPath(path.join(profileRoot, 'cache', 'updates', record.version, expectedName), profileRoot);
+  const suppliedPath = checkedPath(record.installer_path, profileRoot);
+  if (suppliedPath.toLowerCase() !== expectedPath.toLowerCase()) {
+    throw new Error('Pending update installer path is outside the verified updates cache.');
+  }
+  const info = fs.lstatSync(expectedPath);
+  if (info.isSymbolicLink() || !info.isFile() || info.nlink !== 1 || info.size !== record.bytes) {
+    throw new Error('Pending update installer file failed integrity checks.');
+  }
+  await verifyFileSha256(expectedPath, record.sha256);
+  return { version: record.version, filename: expectedName, installerPath: expectedPath, bytes: record.bytes, sha256: record.sha256 };
+}
 
 function contains(root, candidate) {
   const relative = path.relative(path.resolve(root), path.resolve(candidate));
@@ -176,4 +243,5 @@ return { PROJECT, PROFILE, WINDOWS, instance, FRONTEND, BACKEND, APP_NAME, BUILD
 }
 
 module.exports = { createBoundaries, checkedPath, directory, readPackage, isolatedProfileArgument,
+  parseSemver, isNewerVersion, verifyFileSha256, validatePendingUpdate,
   FRONTEND, BACKEND, APP_NAME, BUILD };

@@ -20,10 +20,11 @@
 | Stage 2E (Build Paket Desktop Privat `build-quality-upgrade.ps1`) | **SELESAI (`BUILD PASS`, manifest terverifikasi).** Perbaikan kompatibilitas Windows PowerShell 5.1 pada `Invoke-BuildStep` di `scripts/build-quality-upgrade.ps1`. Build penuh selesai di `quality-upgrade/runs/1dfec1a0-005c-4af7-b09b-465c949c1857/dist/PODCUTAI-InstallerDev-win32-x64` (`4.581` file, `1.098,64 MB`, `257` third-party notices, Electron fuses aktif, `0` `.env` bocor, `yt_dlp_ejs` & YuNet SHA-256 cocok). |
 | Stage 2F (Uji Eksekusi Runtime Paket Desktop `.exe` Baru — Profil Terisolasi) | **SELESAI (`PASS` dengan 2 catatan QA jalur dalam).** `PODCUTBackend.exe --bootstrap-info`, peluncuran nyata `PODCUTAI-InstallerDev.exe --isolated-profile <uuid>`, auto-seed `backend.env` + `face_detection_yunet_2023mar.onnx` (SHA-256 cocok), UI React di dalam Electron (`/api/jobs`, `/api/health`, `/api/models/whisper` `200 OK`), proteksi `403` tanpa `x-podcut-ui-token`/`x-podcut-run-token`, verifikasi `/api/health` frozen (`packaged=true`, `build=phase3a`, `ffmpeg`/`ffprobe`/`youtube_ingest.available`/`reframe.auto_face` semua `true`), serta shutdown Windows Job Object (`clean=true`, `active_processes=0`, port `3300`/`8300` = `0`) seluruhnya terverifikasi di PC B tanpa menyentuh `%LOCALAPPDATA%` maupun `.dev/profile`. |
 | Feature Branch `feat/clipclip-installer` (Rebrand `ClipClip.ai` + Windows Installer `Setup.exe`) | **SELESAI (`PASS` — ter-merge ke `main`).** Rebrand penuh ke `ClipClip.ai` (UI, judul jendela, ikon multi-resolusi `.ico`/`.png`/favicon, `ClipClip.ai.exe`, `%LOCALAPPDATA%\ClipClip.ai`), seluruh `703 / 703` tes lulus (`675` backend + `16` desktop + `12` live handoff + Next.js build), Inno Setup `7.1.1` x64 portabel terverifikasi di `.tools/inno/` (`0` key registry) & otomatis didukung `scripts/setup.ps1 -DownloadTools`, build `ClipClip.ai-win32-x64` (`1.098,85 MB`, `4.585` file, `0` `.env` bocor) + **`ClipClip.ai-Setup-1.0.0-x64.exe` (`315,39 MB`, LZMA2 solid, per-user)**, serta verifikasi runtime frozen `PASS`. |
+| Feature Branch `feat/builtin-updater` (Built-in Update Checker + Verifikasi SHA-256) | **SELESAI (`734 / 734 PASS` — ter-merge ke `main`).** Implementasi fail-closed `backend/app/updater.py` + `version.py` (HTTPS-only `TLS >= 1.2`, blokir SSRF/IP privat, strip `Authorization` lintas host, feed `latest.json` maupun GitHub Releases privat/publik, anti-downgrade semver, verifikasi SHA-256 ganda Python + Electron Node.js), handoff aman di luar Windows Job Object (`desktop/app/boundaries.cjs` & `main.cjs`), dukungan `/SILENT /RELAUNCH=1` di `ClipClip.iss`, auto-generate `latest.json` di `scripts/build-installer.ps1`, dan UI panel `UpdatePanel` di sidebar Studio. Seluruh `734 / 734` tes lulus (`702` backend + `20` desktop Node + `12` live handoff + Next.js typecheck/build + `ISCC --preprocess` + PowerShell AST). |
 | Live Handoff Stage H1 (Safe Auto-Publisher Audit) | **SELESAI (READ-ONLY AUDIT).** Arsitektur least-privilege (`drive.file` + one-time Picker), sanitasi fail-closed, penyimpanan DPAPI di luar Git, dan tahapan implementasi selesai diaudit tanpa mengubah file. |
 | Live Handoff Stage H2A (Offline Status Schema, Sanitizer & Renderer) | **SELESAI (`12 PASS`, `0 FAIL`, `0 SKIP` dalam `0,250s`, mencakup 25 subtest sanitasi).** `docs/LIVE_STATUS.json`, paket stdlib `scripts/live_handoff/`, wrapper `scripts/publish-live-status.ps1`, dan `scripts/tests/test_live_handoff.py` lulus 100% offline dengan `0` request jaringan dan `0` perubahan `.venv`/backend/frontend/desktop. |
 | Live Handoff Stage H2B+ (Bounded Docs Writer / OAuth / DPAPI / Automasi) | **NOT RUN (Menunggu Persetujuan).** Belum diimplementasikan; wajib memakai area terkelola (`BEGIN`/`END`) agar konten manual & marker `LIVE_REFRESH_TEST` di Google Docs produksi tidak terhapus. |
-| Git | **AKTIF & TERSINKRON ke GitHub Privat (`origin/main` & `origin/feat/clipclip-installer`).** Seluruh pekerjaan Stage 1 → 2F + rebrand `ClipClip.ai` + Windows Installer Inno Setup 7.1.1 (`setup.ps1 -DownloadTools` auto-bootstrap) telah ter-merge bersih (*fast-forward*) ke `main` dan di-push ke `https://github.com/khallure/ClipClip.ai.git`. |
+| Git | **AKTIF & TERSINKRON ke GitHub Privat (`origin/main` & `origin/feat/builtin-updater`).** Seluruh pekerjaan Stage 1 → 2F + rebrand `ClipClip.ai` + Windows Installer Inno Setup 7.1.1 + Built-in Update Checker & Verifikasi SHA-256 telah ter-merge (*fast-forward*) ke `main` dan disinkronkan ke `https://github.com/khallure/ClipClip.ai.git`. |
 | Paket historis | Phase 3A dan Quality Upgrade V1 tersimpan sebagai referensi terlindungi dan tidak disentuh. |
 
 ## Cara berpindah sesi
@@ -34,6 +35,46 @@
 4. Di komputer berikutnya, cocokkan SHA branch sebelum bekerja. Jalankan pemeriksaan minimum dari clone dan profil komputer itu. Jika komputer asal mati, gunakan checkpoint remote terakhir atau cadangan Git terenkripsi yang sudah tersedia. Catat perubahan yang masih lokal saat sesi asal berhenti.
 
 ## Pembaruan bukti
+
+### Checkpoint `feat/builtin-updater` — 22 November 2026 (PC B)
+
+- **Tujuan dan batas persetujuan:** Mengimplementasikan arsitektur **Built-in Update Checker + Verifikasi SHA-256** (sesuai rancangan yang disetujui pada `update_architecture.md`) di dalam aplikasi **`ClipClip.ai`** untuk PC A, PC B, dan tester privat pada branch fitur baru `feat/builtin-updater`, disetujui untuk commit/push + fast-forward merge ke `main` dan rebuild `ClipClip.ai-Setup-1.0.0-x64.exe` + `latest.json`. Tidak membuat koneksi jaringan otomatis saat `UPDATE_FEED_URL` kosong.
+- **Komputer dan agent:** PC B — Antigravity.
+- **Branch | SHA dasar | SHA remote `main`:** `feat/builtin-updater` (cabang dari `6774f58738e92bc2a617044fbcf4dbc9fb2df8b1`), di-merge *fast-forward* ke `main` dan di-push ke `origin`.
+- **Perubahan utama pada branch `feat/builtin-updater` (14 file source/tes + `docs/HANDOFF.md`):**
+  - **Backend Updater & Konfigurasi (4 file):**
+    - `backend/app/version.py` *(baru)*: Sumber tunggal `APP_VERSION = '1.0.0'`.
+    - `backend/app/runtime_profile.py`: Menambahkan `UPDATE_FEED_URL` & `UPDATE_AUTO_CHECK` ke `SETTING_NAMES`, serta `UPDATE_GITHUB_TOKEN` ke `PRIVATE_SETTING_NAMES` (lokal di `%LOCALAPPDATA%\ClipClip.ai\config\backend.env`, tidak pernah masuk Git/UI/log).
+    - `backend/app/updater.py` *(baru)*: `AppUpdater` fail-closed (HTTPS-only `TLS >= 1.2`, validasi DNS/blokir SSRF & IP privat, `_SafeRedirectHandler` yang menghapus `Authorization`/`Cookie`/`Proxy-Authorization` lintas host, parser feed `latest.json` maupun GitHub Releases API privat/publik + cross-check digest aset GitHub, strict anti-downgrade semver, streaming download dengan batas ukuran + pembatalan + reuse cache + verifikasi SHA-256 + re-hash TOCTOU sebelum menulis `runtime/pending-update.json`, serta blokir `install` di mode DEV dan `--isolated-profile` QA). Rute terproteksi: `GET /api/updates`, `POST /api/updates/check`, `/download`, `/cancel`, `/install`.
+    - `backend/app/main.py`: Integrasi lazy `updater()`, `register_update_routes`, cleanup di `lifespan`, dan penayangan `app_version` + `updates` pada `GET /api/health`.
+  - **Desktop Electron Handoff & Installer Inno Setup (4 file):**
+    - `desktop/app/boundaries.cjs`: Menambahkan & mengekspor `parseSemver`, `isNewerVersion`, `verifyFileSha256`, dan `validatePendingUpdate` (verifikasi independen skema, `run_id`, strict newer semver, nama file installer, batas ukuran, path ketat dalam `PROFILE/cache/updates/<version>/`, `nlink === 1`, anti-symlink, serta streaming SHA-256 ulang di Node.js).
+    - `desktop/app/main.cjs`: Menambahkan `startUpdateWatcher()` (otomatis nonaktif saat `--isolated-profile`), polling `PROFILE/runtime/pending-update.json` tiap `1500ms`, konsumsi sekali pakai (`unlink`), validasi penuh + SHA-256 ulang, `await shutdown()` untuk melepas Job Object & kunci file/port, lalu menjalankan installer terpisah (`detached: true`, `unref()`) dengan argumen `/SILENT /SUPPRESSMSGBOXES /NORESTART /CLOSEAPPLICATIONS /RELAUNCH=1` dan `app.exit(0)`.
+    - `desktop/installer/ClipClip.iss`: Menambahkan fungsi `[Code]` `ShouldRelaunchAfterSilentUpdate()` dan entri `[Run]` untuk meluncurkan ulang `ClipClip.ai.exe` otomatis setelah update senyap selesai (`RELAUNCH=1`).
+    - `scripts/build-installer.ps1`: Menambahkan parameter `-ReleaseNotes` & `-DownloadUrl`, mengubah metadata `updater = $true`, dan otomatis menghasilkan file `latest.json` berisi versi, ukuran, dan SHA-256 di sebelah `ClipClip.ai-Setup-<version>-x64.exe`.
+  - **Frontend Studio UI (4 file):**
+    - `frontend/lib/types.ts`: Tipe `UpdateStatus` dan field `app_version` / `updates` pada `Health`.
+    - `frontend/components/UpdatePanel.tsx` & `frontend/components/UpdatePanel.module.css` *(baru)*: Tombol status update di footer sidebar + modal interaksi (Cek Pembaruan, Unduh dengan progress bar & kecepatan, Batal, badge terverifikasi SHA-256, Instal & Mulai Ulang, serta panduan pengaturan `backend.env` lokal).
+    - `frontend/app/page.tsx`: Memasang `<UpdatePanel initial={health?.updates} />` dan versi dinamis `v{health?.app_version || "1.0.0"} · LOCAL`.
+  - **Pengujian Otomatis (2 file baru):**
+    - `backend/tests/test_updater.py`: 27 pengujian offline menyeluruh (validasi URL/SSRF, anti-downgrade, redirect header stripping, feed `latest.json` & GitHub Releases privat/publik, mismatch SHA-256, file korup/melebihi batas, pembatalan, reuse cache, TOCTOU tampering, penolakan `install` di mode DEV/`--isolated-profile`, dan redaksi token dari status/error).
+    - `desktop/tests/updater-handoff.test.cjs`: 4 grup pengujian handoff desktop (semver, validasi lengkap SHA-256 Node.js, penolakan tamper/downgrade/`run_id`/path traversal/ukuran/SHA-256, dan penolakan hardlink `nlink > 1`).
+- **Perintah dan hasil PASS / FAIL / NOT RUN:**
+  - **Regresi penuh (734 / 734 PASS):**
+    - `backend/tests/test_updater.py`: **`27 PASSED`, `0 FAILED`, `0 SKIPPED`** (`2,96s`).
+    - Backend full `pytest` (26 file): **`702 PASSED`, `0 FAILED`, `0 SKIPPED`** (`153,00s`).
+    - Frontend `npm run typecheck` (`tsc --noEmit`) & `npm run build` (`next build --webpack`): **`PASS`**.
+    - Desktop Node tests (5 file, termasuk `updater-handoff.test.cjs`): **`20 PASSED`, `0 FAILED`, `0 SKIPPED`** (`9,47s`).
+    - Live Handoff tests (`scripts/tests/test_live_handoff.py`): **`12 PASSED`, `0 FAILED`, `0 SKIPPED`** (`0,33s`).
+  - **Validasi skrip & kebersihan:**
+    - `ISCC.exe /Q --preprocess` pada `desktop/installer/ClipClip.iss`: **`PASS`** (`ISS_PREPROCESS_EXIT=0`).
+    - PowerShell AST parser pada `scripts/build-installer.ps1`: **`PASS`** (`PS1_PARSE_ERRORS=0`).
+    - Kebersihan bytecode: **`PYCACHE=0`**.
+  - **Rebuild installer `ClipClip.ai-Setup-1.0.0-x64.exe` + `latest.json` dan Git commit/push:** **`NOT RUN`** (menunggu persetujuan eksplisit pengguna).
+- **Satu langkah berikutnya (Menunggu Persetujuan):**
+  - Memilih apakah ingin: (1) Commit & push `feat/builtin-updater` (dan opsional merge ke `main`), (2) Build ulang **`ClipClip.ai-Setup-1.0.0-x64.exe` + `latest.json`** agar installer `1.0.0` yang dipasang sudah membawa fitur Built-in Updater + Verifikasi SHA-256, atau (3) Keduanya.
+
+---
 
 ### Checkpoint `feat/clipclip-installer` — 22 November 2026 (PC B)
 

@@ -7,7 +7,7 @@ const net = require('node:net');
 const crypto = require('node:crypto');
 const { spawn, spawnSync } = require('node:child_process');
 const readline = require('node:readline');
-const { createBoundaries, readPackage, isolatedProfileArgument, FRONTEND, BACKEND, APP_NAME, BUILD } = require('./boundaries.cjs');
+const { createBoundaries, readPackage, isolatedProfileArgument, validatePendingUpdate, FRONTEND, BACKEND, APP_NAME, BUILD } = require('./boundaries.cjs');
 const { privateIdentityRequest } = require('./private-http.cjs');
 
 let PROFILE, PROJECT, checkedPath, directory, assertInheritedPaths, childEnvironment,
@@ -46,6 +46,8 @@ const owned = new Map();
 let hostReady = false;
 let hostExited = false;
 let jobClosedCleanly = false;
+let updateTimer = null;
+let updateApplying = false;
 
 function log(message) {
   if (logPath) fs.appendFileSync(checkedPath(logPath, PROFILE), `${new Date().toISOString()} ${message}\n`);
@@ -119,6 +121,7 @@ async function ready(url, headers, packageRoot, frontend = false) {
 }
 
 async function shutdown() {
+  if (updateTimer) { clearInterval(updateTimer); updateTimer = null; }
   if (shutdownPromise) return shutdownPromise;
   shutdownPromise = (async () => {
     writeRuntime('stopping');
@@ -246,6 +249,46 @@ function browser(token) {
   return mainWindow.loadURL(FRONTEND);
 }
 
+function startUpdateWatcher() {
+  if (profileInstance || updateTimer) return;
+  const handoffPath = checkedPath(path.join(PROFILE, 'runtime', 'pending-update.json'), PROFILE);
+  updateTimer = setInterval(async () => {
+    if (updateApplying || shutdownPromise || !fs.existsSync(handoffPath)) return;
+    updateApplying = true;
+    try {
+      const checked = checkedPath(handoffPath, PROFILE);
+      const statInfo = fs.lstatSync(checked);
+      if (statInfo.isSymbolicLink() || !statInfo.isFile() || statInfo.size > 16384) {
+        throw new Error('Pending update descriptor is unsafe or oversized.');
+      }
+      const raw = fs.readFileSync(checked, 'utf8');
+      fs.unlinkSync(checked);
+      const record = JSON.parse(raw);
+      const verified = await validatePendingUpdate(record, {
+        profileRoot: PROFILE, runId, currentVersion: app.getVersion(),
+      });
+      log(`Verified ClipClip.ai update v${verified.version}; shutting down services before installer handoff.`);
+      if (updateTimer) { clearInterval(updateTimer); updateTimer = null; }
+      await shutdown();
+      const child = spawn(
+        verified.installerPath,
+        ['/SILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/CLOSEAPPLICATIONS', '/RELAUNCH=1'],
+        { cwd: path.dirname(verified.installerPath), detached: true, stdio: 'ignore', shell: false },
+      );
+      child.unref();
+      allowQuit = true;
+      app.exit(0);
+    } catch (error) {
+      try { if (fs.existsSync(handoffPath)) fs.unlinkSync(checkedPath(handoffPath, PROFILE)); } catch {}
+      log(`Rejected pending update handoff: ${error.message}`);
+      updateApplying = false;
+      if (mainWindow && !shutdownPromise) {
+        dialog.showErrorBox('ClipClip.ai', `Update ditolak karena verifikasi integritas gagal: ${error.message}`);
+      }
+    }
+  }, 1500);
+}
+
 try {
   nativeBootstrap();
   assertInheritedPaths(process.env);
@@ -298,6 +341,7 @@ try {
       await verifyBothListeners();
       writeRuntime('ready');
       log('Verified private frontend and backend; opening isolated desktop UI.');
+      startUpdateWatcher();
       await browser(uiToken);
     }).catch(async error => {
       log(`Startup failed: ${error.message}`);

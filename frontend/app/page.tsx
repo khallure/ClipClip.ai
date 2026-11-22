@@ -7,6 +7,7 @@ import { activeStatuses, type AIProvider, type AnalysisSettings, type Candidate,
 import { ReframeEditor, ReframePreview, type ReframeState } from "@/components/ReframeEditor";
 import { PoppinsOverlay, SubtitlePanel, defaultSubtitleStyle, type CaptionDocument, type SubtitleStyle } from "@/components/PoppinsCaptions";
 import { ModelSetup } from "@/components/ModelSetup";
+import { UpdatePanel } from "@/components/UpdatePanel";
 
 const scoreLabels = [
   ["hook_strength", "Kekuatan pembuka", 30], ["content_payoff", "Kekuatan penutup", 25], ["standalone_clarity", "Kejelasan konteks", 20], ["emotional_impact", "Dampak emosi", 15], ["edit_readiness", "Kesiapan edit", 10],
@@ -447,7 +448,7 @@ export default function Studio() {
       <div className="sidebar-divider" />
       <div className="workspace-label recent-label">PROYEK TERBARU</div>
       <div className="recent-projects">{jobs.length ? jobs.slice(0, 4).map(item => <button key={item.id} onClick={() => void openProject(item)} disabled={!!task} className={job?.id === item.id ? "recent-project current" : "recent-project"}><Film size={14} /><span>{item.title || "Proyek tanpa judul"}</span></button>) : <p>Klip berikutnya<br />dimulai di sini.</p>}</div>
-      <div className="sidebar-bottom"><div className="local-card"><div className="local-card-icon"><HardDrive size={17} /></div><div><strong>Studio di komputer Anda</strong><span>File tersimpan lokal.</span></div><span className="tiny-dot" /></div><button className="help-button" onClick={() => setHelp(true)}><CircleHelp size={16} />Panduan singkat<ExternalLink size={12} /></button><div className="sidebar-version"><span>ClipClip.ai</span><span>V1.0 · LOCAL</span></div></div>
+      <div className="sidebar-bottom"><div className="local-card"><div className="local-card-icon"><HardDrive size={17} /></div><div><strong>Studio di komputer Anda</strong><span>File tersimpan lokal.</span></div><span className="tiny-dot" /></div><UpdatePanel initial={health?.updates} /><button className="help-button" onClick={() => setHelp(true)}><CircleHelp size={16} />Panduan singkat<ExternalLink size={12} /></button><div className="sidebar-version"><span>ClipClip.ai</span><span>v{health?.app_version || "1.0.0"} · LOCAL</span></div></div>
     </aside>
 
     <div className="main-shell">

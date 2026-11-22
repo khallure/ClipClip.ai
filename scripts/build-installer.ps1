@@ -1,6 +1,8 @@
 param(
     [string]$BuildId = '',
-    [string]$AppVersion = '1.0.0'
+    [string]$AppVersion = '1.0.0',
+    [string]$ReleaseNotes = 'Rilis desktop ClipClip.ai.',
+    [string]$DownloadUrl = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -116,7 +118,7 @@ $manifestObj = [ordered]@{
     default_install_dir = '%LOCALAPPDATA%\Programs\ClipClip.ai'
     user_data_dir = '%LOCALAPPDATA%\ClipClip.ai'
     signed = $false
-    updater = $false
+    updater = $true
     compiler = ('Inno Setup ' + $innoLock.version)
     installer_file = $installerInfo.Name
     installer_path = $installerExe
@@ -131,5 +133,25 @@ $manifestObj = [ordered]@{
 $manifestPath = Resolve-InstallerPath (Join-Path $installerDir 'installer-manifest.json')
 $manifestObj | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
 
+$resolvedDownloadUrl = if ($DownloadUrl) { $DownloadUrl.Trim() } else { "https://github.com/khallure/ClipClip.ai/releases/download/v$AppVersion/$($installerInfo.Name)" }
+$latestObj = [ordered]@{
+    schema = 1
+    product = 'ClipClip.ai'
+    platform = 'win32'
+    arch = 'x64'
+    version = $AppVersion
+    published_at = $manifestObj.created_at
+    notes = $ReleaseNotes.Trim()
+    installer = [ordered]@{
+        filename = $installerInfo.Name
+        bytes = [long]$installerInfo.Length
+        sha256 = $installerSha
+        url = $resolvedDownloadUrl
+    }
+}
+$latestPath = Resolve-InstallerPath (Join-Path $installerDir 'latest.json')
+$latestObj | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $latestPath -Encoding UTF8
+
 Write-Host ('Installer siap: ' + $installerExe) -ForegroundColor Green
+Write-Host ('Manifest update: ' + $latestPath) -ForegroundColor Green
 Write-Host ('Ukuran: ' + [Math]::Round($installerInfo.Length / 1MB, 2) + ' MB | SHA-256: ' + $installerSha)
