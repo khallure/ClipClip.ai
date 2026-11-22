@@ -149,7 +149,8 @@ function Test-ToolchainManifestAndArtifacts($Manifest, [switch]$AllowDownload) {
         @{ Key = 'npm'; Version = '11.19.1'; NeedsArchive = $false },
         @{ Key = 'ffmpeg'; Version = '9.0.2'; NeedsArchive = $true },
         @{ Key = 'electron'; Version = '45.3.4'; NeedsArchive = $true },
-        @{ Key = 'pyinstaller'; Version = '6.22.3'; NeedsArchive = $false }
+        @{ Key = 'pyinstaller'; Version = '6.22.3'; NeedsArchive = $false },
+        @{ Key = 'inno_setup'; Version = '7.1.1'; NeedsArchive = $true }
     )
 
     $unverified = @()
@@ -244,6 +245,13 @@ function Expand-VerifiedToolArchive($ToolEntry, [string]$Label, [string]$Expecte
             if ($LASTEXITCODE -ne 0) {
                 throw "Gagal mengekstrak arsip tar.gz '$archivePath' dengan tar.exe (exit code $LASTEXITCODE)."
             }
+        } elseif ($ToolEntry.archive_format -ceq 'inno-portable-exe') {
+            # Pass a single quoted argument string so spaces in workspace paths stay inside $stageDir.
+            $innoArgs = '/PORTABLE=1 /CURRENTUSER /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /NOICONS /DIR="' + $stageDir + '"'
+            $innoProc = Start-Process -FilePath $archivePath -ArgumentList $innoArgs -Wait -PassThru
+            if ($innoProc.ExitCode -ne 0) {
+                throw "Gagal membongkar Inno Setup portabel '$archivePath' (exit code $($innoProc.ExitCode))."
+            }
         } else {
             $zipHandle = [IO.Compression.ZipFile]::OpenRead($archivePath)
             try {
@@ -316,6 +324,9 @@ function Assert-ExtractedToolVersions($Manifest) {
             throw "Versi $mediaTool di '$mediaExe' tidak sesuai dengan pin $($Manifest.tools.ffmpeg.version) (aktual: $versionHeader)."
         }
     }
+
+    $isccExe = Assert-DevPath (Join-Path $script:ProjectRoot ($Manifest.tools.inno_setup.executable -replace '/', '\'))
+    $null = Assert-FileSha256 $isccExe ([string]$Manifest.tools.inno_setup.executable_sha256) 'Inno Setup ISCC.exe'
 }
 
 $manifestPath = Assert-WorkspacePath (Join-Path $WorkspaceRoot 'scripts\toolchain.lock.json')
@@ -336,6 +347,7 @@ if ($ValidateOnly) {
 Expand-VerifiedToolArchive $manifest.tools.python 'python' $manifest.tools.python.executable
 Expand-VerifiedToolArchive $manifest.tools.node 'node' $manifest.tools.node.executable
 Expand-VerifiedToolArchive $manifest.tools.ffmpeg 'ffmpeg' $manifest.tools.ffmpeg.executable
+Expand-VerifiedToolArchive $manifest.tools.inno_setup 'inno_setup' $manifest.tools.inno_setup.executable
 
 . (Join-Path $PSScriptRoot 'common.ps1')
 
