@@ -68,6 +68,31 @@ export function collectLicenseNotices(payload) {
   copyFile(path.join(PROJECT, '.tools/python/LICENSE.txt'), 'Python-LICENSE.txt');
   copyFile(path.join(PROJECT, 'backend/assets/fonts/OFL.txt'), 'Poppins-OFL.txt');
   copyFile(path.join(PROJECT, 'backend/assets/models/LICENSE.YuNet.txt'), 'YuNet-MIT.txt');
+  copyFile(path.join(PROJECT, 'backend/assets/licenses/LICENSE.Subtle-MIT.txt'), 'subtle/LICENSE.Subtle-MIT.txt');
+  copyFile(path.join(PROJECT, 'backend/assets/licenses/THIRD_PARTY.Subtle.md'), 'subtle/THIRD_PARTY.Subtle.md');
+  copyFile(path.join(PROJECT, 'backend/assets/models/segmentation/LICENSE.Segmentation-Apache-2.0.txt'), 'subtle/LICENSE.Segmentation-Apache-2.0.txt');
+  const subtleFontsDir = path.join(PROJECT, 'backend/assets/subtle_fonts');
+  for (const entry of fs.readdirSync(subtleFontsDir, { withFileTypes: true })) {
+    if (entry.isFile() && /^OFL-.*\.txt$/i.test(entry.name)) {
+      copyFile(path.join(subtleFontsDir, entry.name), path.join('subtle/fonts', entry.name));
+    }
+  }
+  const subtleModules = path.join(payload, 'subtle-renderer/node_modules');
+  if (fs.existsSync(subtleModules)) {
+    const subtlePending = [subtleModules];
+    while (subtlePending.length) {
+      const current = checkedPath(subtlePending.pop(), PROJECT);
+      const metadata = path.join(current, 'package.json');
+      if (fs.existsSync(metadata)) {
+        const relative = path.relative(subtleModules, current);
+        licenseFiles(current, path.join('subtle-renderer', relative));
+      }
+      for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+        if (entry.isDirectory()) subtlePending.push(checkedPath(path.join(current, entry.name), PROJECT));
+        else if (entry.isSymbolicLink()) throw new Error('Linked Subtle renderer package refused.');
+      }
+    }
+  }
   fs.writeFileSync(path.join(destination, 'inventory.json'), JSON.stringify({
     packages, files: notices, notice: 'License retention for a private development build. This inventory does not establish GPL corresponding-source completeness or authorize publication.'
   }, null, 2));

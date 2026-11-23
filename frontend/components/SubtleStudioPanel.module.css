@@ -1,0 +1,403 @@
+.panel {
+  border-top: 1px solid #303a2a;
+  padding: 18px 17px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e4edd8;
+}
+
+.title svg {
+  color: var(--lime);
+}
+
+.badge {
+  font-size: 9px;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 5px;
+  border: 1px solid #3d522c;
+  background: #1d2815;
+  color: var(--lime);
+}
+
+.statusCard {
+  border: 1px solid #495734;
+  background: #182114;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11px;
+  color: #cddab8;
+  line-height: 1.6;
+}
+
+.warnCard {
+  border-color: #624e2b;
+  background: #2b2314;
+  color: #e7c288;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  background: #101414;
+  border: 1px solid #283128;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.tabBtn {
+  padding: 8px 6px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #8c988b;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.tabBtn:hover {
+  color: #d6e2ca;
+  background: #181e19;
+}
+
+.tabActive {
+  background: #25341b;
+  color: var(--lime);
+  border: 1px solid #4b6732;
+}
+
+.filterRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #303a2d;
+  background: #101413;
+  color: var(--text);
+  font-size: 11px;
+}
+
+.catRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.catChip {
+  font-size: 10px;
+  padding: 5px 9px;
+  border-radius: 99px;
+  border: 1px solid #2e382b;
+  background: #141916;
+  color: #9ba796;
+}
+
+.catChipActive {
+  background: #26381b;
+  border-color: #7c9b49;
+  color: var(--lime);
+}
+
+.styleGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.styleCard {
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid #283028;
+  background: #121715;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.styleCard:hover {
+  border-color: #465b36;
+  background: #161d17;
+}
+
+.styleCardActive {
+  border-color: var(--lime);
+  background: #1f2b15;
+}
+
+.styleCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.styleCardTop strong {
+  font-size: 11px;
+  color: #edf3e4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.styleCard p {
+  margin: 0;
+  font-size: 9px;
+  color: #829082;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.miniTags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.miniTag {
+  font-size: 8px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #1e261b;
+  color: #9fb87e;
+  border: 1px solid #34432a;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 10px;
+  color: #b8c5ad;
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.fieldHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+}
+
+.fieldHeader strong {
+  color: var(--lime);
+  font-weight: 500;
+  font-family: Consolas, monospace;
+  font-size: 10px;
+}
+
+.select,
+.textInput,
+.textarea {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid #354130;
+  border-radius: 6px;
+  background: #141b13;
+  color: var(--text);
+  font-size: 11px;
+}
+
+.textarea {
+  min-height: 82px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.monoArea {
+  font-family: Consolas, monospace;
+  font-size: 10px;
+  min-height: 130px;
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.colorInput {
+  width: 42px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid #354130;
+  border-radius: 6px;
+  background: #141b13;
+  cursor: pointer;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 10px;
+  color: #c5d1bc;
+  padding: 6px 0;
+}
+
+.actionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pillBtn {
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid #38492e;
+  background: #182115;
+  color: #c2d2b5;
+  font-size: 10px;
+}
+
+.pillBtnActive {
+  border-color: var(--lime);
+  background: #283a1d;
+  color: var(--lime);
+}
+
+.wordPages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.pageBox {
+  border: 1px solid #2b3528;
+  border-radius: 7px;
+  padding: 8px;
+  background: #111612;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pageBoxMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 9px;
+  color: #7c8a79;
+}
+
+.wordChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.wordChip {
+  font-size: 10px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  border: 1px solid #313d2e;
+  background: #171e18;
+  color: #d6e0cf;
+}
+
+.wordChipEmph {
+  border-color: var(--lime);
+  background: #2b3d1c;
+  color: var(--lime);
+  font-weight: 600;
+}
+
+.notesList {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 10px;
+  color: #a9b89b;
+  line-height: 1.6;
+}
+
+.diagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 10px;
+  color: #a5b49b;
+}
+
+.diagSwatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: #141a14;
+  border: 1px solid #2c372a;
+}
+
+.swatchDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.hint {
+  margin: 0;
+  font-size: 9px;
+  color: #7e8d7c;
+  line-height: 1.55;
+}
+
+@media (max-width: 540px) {
+  .tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .styleGrid,
+  .fieldGrid {
+    grid-template-columns: 1fr;
+  }
+}

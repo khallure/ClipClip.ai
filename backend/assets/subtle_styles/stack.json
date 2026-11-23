@@ -1,0 +1,51 @@
+{
+  "name": "stack",
+  "label": "Stack",
+  "description": "A tilted, overlapping pile of words, each at its own size and angle, key words in yellow; the tilt mirrors on alternate pages.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Montserrat Black",
+    "file": "Montserrat-Black.ttf",
+    "weight": 900
+  },
+  "case": "sentence",
+  "size": 4.9,
+  "wideScale": 1.1,
+  "lineHeight": 1.1,
+  "letterSpacing": -0.02,
+  "color": "#FFFFFF",
+  "activeColor": "#FFE500",
+  "shadow": null,
+  "position": {
+    "y": 52,
+    "marginX": 6
+  },
+  "page": {
+    "maxWords": 6,
+    "maxCharsPerLine": 40,
+    "maxCharsPerLineWide": 60,
+    "maxLines": 1,
+    "minFrames": 18,
+    "maxFrames": 100,
+    "gapBreakMs": 350
+  },
+  "anim": {
+    "type": "stack",
+    "keyScale": 1.45,
+    "pileWidth": 50,
+    "pitch": 1.08,
+    "popIn": 2,
+    "popFrom": 1.3,
+    "stroke": 3,
+    "shadowY": 4
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "halo",
+    "max": 0.6
+  }
+}

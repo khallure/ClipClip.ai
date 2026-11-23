@@ -1,0 +1,69 @@
+{
+  "name": "ticket",
+  "label": "Ticket",
+  "description": "A hard-edged label tight around the text, tilted a different angle on every page. The hot word sits alone on a big label, filler phrases on a small one. Hard cuts. Colourway: yellow.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Inter Bold",
+    "file": "Inter-Bold.ttf",
+    "weight": 700
+  },
+  "case": "sentence",
+  "size": 3.6,
+  "wideScale": 1.5,
+  "lineHeight": 1.2,
+  "letterSpacing": -0.01,
+  "color": "#FFFFFF",
+  "shadow": null,
+  "container": {
+    "kind": "label",
+    "fill": "#000000",
+    "padX": 0.22,
+    "padY": 0.24
+  },
+  "emphasis": {
+    "color": "#F60069",
+    "scale": 1.7
+  },
+  "position": {
+    "x": 50,
+    "y": 65,
+    "marginX": 8
+  },
+  "page": {
+    "maxLines": 1,
+    "minFrames": 10,
+    "maxFrames": 80,
+    "gapBreakMs": 350,
+    "maxWords": 4,
+    "maxCharsPerLine": 22,
+    "maxCharsPerLineWide": 36
+  },
+  "anim": {
+    "type": "ticket"
+  },
+  "behind": {
+    "enabled": false
+  },
+  "variants": {
+    "yellow": {
+      "font": {
+        "family": "Archivo Black",
+        "file": "ArchivoBlack-Regular.ttf",
+        "weight": 400
+      },
+      "case": "upper",
+      "letterSpacing": -0.01,
+      "color": "#0A0A0A",
+      "container": {
+        "fill": "#FDFD01"
+      },
+      "emphasis": {
+        "color": "#0A0A0A",
+        "scale": 1.6
+      }
+    }
+  }
+}

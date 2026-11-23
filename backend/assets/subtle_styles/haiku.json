@@ -1,0 +1,63 @@
+{
+  "name": "haiku",
+  "label": "Haiku",
+  "description": "One small condensed serif word at a time in acid yellow. Hard cuts, no box. A hot word turns italic and a lighter yellow.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Instrument Serif",
+    "file": "InstrumentSerif-Regular.ttf",
+    "weight": 400
+  },
+  "case": "sentence",
+  "size": 6.8,
+  "wideScale": 1.6,
+  "lineHeight": 1.2,
+  "letterSpacing": -0.02,
+  "color": "#F4EF36",
+  "shadow": {
+    "x": 0,
+    "y": 0.15,
+    "blur": 1.0,
+    "color": "rgba(0,0,0,0.75)"
+  },
+  "emphasis": {
+    "font": {
+      "family": "Instrument Serif Italic",
+      "file": "InstrumentSerif-Italic.ttf",
+      "weight": 400
+    },
+    "color": {
+      "auto": "accent",
+      "fallback": "#FFF65A"
+    },
+    "scale": 1.2
+  },
+  "position": {
+    "x": 50,
+    "y": 72,
+    "marginX": 10
+  },
+  "page": {
+    "maxLines": 1,
+    "minFrames": 6,
+    "maxFrames": 45,
+    "gapBreakMs": 250,
+    "maxWords": 1,
+    "maxCharsPerLine": 20,
+    "maxCharsPerLineWide": 30
+  },
+  "anim": {
+    "type": "haiku",
+    "stroke": 0.075,
+    "bold": 0.016
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "halo",
+    "max": 0.8
+  }
+}

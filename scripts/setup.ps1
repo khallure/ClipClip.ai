@@ -431,4 +431,22 @@ if ($electronActualHash -ine $electronChecksums.$electronArchiveName) {
     throw "SHA-256 arsip Electron berbeda dari desktop\node_modules\electron\checksums.json."
 }
 
+$subtleRendererDir = Assert-DevPath (Join-Path $script:ProjectRoot 'subtle-renderer')
+Push-Location -LiteralPath $subtleRendererDir
+try {
+    $subtleLock = Assert-DevPath (Join-Path $subtleRendererDir 'package-lock.json')
+    if (-not (Test-Path -LiteralPath $subtleLock -PathType Leaf)) {
+        throw 'subtle-renderer\package-lock.json wajib tersedia untuk npm ci.'
+    }
+    Write-Host 'Memasang dependency Subtle renderer menggunakan subtle-renderer\package-lock.json...'
+    Invoke-PackageManager $manager @('ci', '--cache', $env:npm_config_cache, '--prefix', $subtleRendererDir, '--no-audit', '--no-fund')
+    Write-Host 'Membangun bundle Subtle Remotion dan memverifikasi Chrome Headless Shell...'
+    & $nodeExecutable 'build-bundle.mjs'
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Gagal membangun bundle Subtle renderer (build-bundle.mjs).'
+    }
+} finally {
+    Pop-Location
+}
+
 Write-Host 'Bootstrap PODCUT Multi-PC selesai dan terverifikasi. Jalankan scripts\test.ps1 atau scripts\start.ps1.' -ForegroundColor Green

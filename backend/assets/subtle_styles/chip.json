@@ -1,0 +1,58 @@
+{
+  "name": "chip",
+  "label": "Chip",
+  "description": "A light rounded chip that hugs the page; words turn from grey to black as they are spoken.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Poppins SemiBold",
+    "file": "Poppins-SemiBold.ttf",
+    "weight": 600
+  },
+  "case": "lower",
+  "size": 3.4,
+  "wideScale": 1.4,
+  "lineHeight": 1.25,
+  "letterSpacing": 0,
+  "color": "#111111",
+  "dimColor": "#8E8E93",
+  "shadow": null,
+  "backdropBlur": 8,
+  "container": {
+    "kind": "chip",
+    "fill": "rgba(229,227,231,0.88)",
+    "padX": 0.95,
+    "padY": 0.5,
+    "radius": 0.28
+  },
+  "emphasis": {
+    "fill": "#141414",
+    "color": "#F6F6F4",
+    "padX": 0.3,
+    "chipHeight": 1.42,
+    "chipIn": 4
+  },
+  "position": {
+    "y": 75,
+    "marginX": 9
+  },
+  "page": {
+    "maxWords": 3,
+    "maxCharsPerLine": 18,
+    "maxCharsPerLineWide": 30,
+    "maxLines": 1,
+    "minFrames": 14,
+    "maxFrames": 90,
+    "gapBreakMs": 350
+  },
+  "anim": {
+    "type": "chip",
+    "pageIn": 2,
+    "pageOut": 1,
+    "wordIn": 2
+  },
+  "behind": {
+    "enabled": false
+  }
+}

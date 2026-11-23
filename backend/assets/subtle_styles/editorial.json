@@ -1,0 +1,61 @@
+{
+  "name": "editorial",
+  "label": "Editorial",
+  "description": "A bold sans lowercase line with the keyword set about three times larger in a high-contrast italic serif in cinema red, overlapping the sans. Lower-left third.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Inter Bold",
+    "file": "Inter-Bold.ttf",
+    "weight": 700
+  },
+  "case": "lower",
+  "size": 3.8,
+  "wideScale": 1.6,
+  "lineHeight": 1.2,
+  "letterSpacing": -0.02,
+  "color": "#FFFFFF",
+  "shadow": {
+    "x": 0,
+    "y": 0.2,
+    "blur": 1.0,
+    "color": "rgba(0,0,0,0.5)"
+  },
+  "emphasis": {
+    "font": {
+      "family": "Playfair Display Black Italic",
+      "file": "PlayfairDisplay-BlackItalic.ttf",
+      "weight": 900
+    },
+    "color": "#D81B22",
+    "scale": 3.0,
+    "letterSpacing": -0.01
+  },
+  "position": {
+    "x": 9,
+    "y": 70,
+    "marginX": 6
+  },
+  "page": {
+    "maxLines": 2,
+    "minFrames": 14,
+    "maxFrames": 80,
+    "gapBreakMs": 350,
+    "maxWords": 4,
+    "maxCharsPerLine": 14,
+    "maxCharsPerLineWide": 24
+  },
+  "anim": {
+    "type": "editorial",
+    "rowGap": 2.25,
+    "afterGap": 1.45,
+    "keyInset": 0.0,
+    "keyIn": 3,
+    "keyFrom": 0.85,
+    "keyBlur": 3
+  },
+  "behind": {
+    "enabled": false
+  }
+}

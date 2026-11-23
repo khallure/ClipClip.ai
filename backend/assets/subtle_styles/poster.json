@@ -1,0 +1,43 @@
+{
+  "name": "poster",
+  "label": "Poster",
+  "description": "Two or three words stacked behind the speaker, each line a different face fitted to the same width, like a film poster's title block.",
+  "engines": ["remotion"],
+  "font": {"family": "Montserrat Medium", "file": "Montserrat-Medium.ttf", "weight": 500},
+  "case": "upper",
+  "size": 2.1,
+  "wideScale": 1.5,
+  "lineHeight": 1.6,
+  "letterSpacing": 0.2,
+  "color": "#F4F1EA",
+  "shadow": {"x": 0, "y": 0.1, "blur": 0.8, "color": "rgba(0,0,0,0.5)"},
+  "emphasis": {"color": "#FFFFFF"},
+  "position": {"y": 68, "marginX": 8, "flex": [52, 84]},
+  "page": {"maxWords": 4, "maxCharsPerLine": 24, "maxCharsPerLineWide": 40, "maxLines": 2, "minFrames": 12, "maxFrames": 90, "gapBreakMs": 350},
+  "anim": {
+    "type": "poster", "stagger": 3, "lineIn": 9, "trackFrom": 0.25, "blur": 10, "gap": 0.012, "bigOut": 5, "smallIn": 4, "smallRise": 7,
+    "lines": [
+      {"font": {"family": "Instrument Serif Italic", "file": "InstrumentSerif-Italic.ttf", "weight": 400}, "case": "sentence", "track": 0},
+      {"font": {"family": "Anton", "file": "Anton-Regular.ttf", "weight": 400}, "case": "upper", "track": 0.01},
+      {"font": {"family": "Montserrat Medium", "file": "Montserrat-Medium.ttf", "weight": 500}, "case": "upper", "track": 0.22}
+    ]
+  },
+  "behind": {
+    "enabled": true,
+    "skipFront": true,
+    "bigY": 18,
+    "bigWidth": 62,
+    "bigMaxSize": 17,
+    "bandHeight": 0.22,
+    "target": 0.28,
+    "bigColor": "#F4F1EA",
+    "maxBigWords": 3,
+    "maxChars": 32,
+    "minWords": 2,
+    "minHoldMs": 1100,
+    "everyMs": 2200,
+    "minGapMs": 150,
+    "minVisible": 0.4
+  },
+  "legibility": {"mode": "halo", "max": 1}
+}

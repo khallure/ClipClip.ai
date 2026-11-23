@@ -1,0 +1,55 @@
+{
+  "name": "hype",
+  "label": "Hype",
+  "description": "A calm medium-weight line in soft white with a gentle shadow; the key word turns warm yellow. Hard cut in, no outline.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Montserrat Bold",
+    "file": "Montserrat-Bold.ttf",
+    "weight": 700
+  },
+  "case": "sentence",
+  "size": 4.4,
+  "wideScale": 1.2,
+  "lineHeight": 1.2,
+  "letterSpacing": 0,
+  "color": "#FFFFFF",
+  "activeColor": {
+    "auto": "accent",
+    "fallback": "#FCD402"
+  },
+  "shadow": {
+    "x": 0,
+    "y": 0.25,
+    "blur": 1.0,
+    "color": "rgba(0,0,0,0.8)"
+  },
+  "position": {
+    "y": 47,
+    "marginX": 8
+  },
+  "page": {
+    "maxWords": 5,
+    "maxCharsPerLine": 26,
+    "maxCharsPerLineWide": 44,
+    "maxLines": 1,
+    "minFrames": 10,
+    "maxFrames": 60,
+    "gapBreakMs": 300
+  },
+  "anim": {
+    "type": "hype",
+    "mode": "word",
+    "pageIn": 1,
+    "pageOut": 1
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "halo",
+    "max": 1
+  }
+}

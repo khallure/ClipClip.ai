@@ -79,16 +79,32 @@ def tool(name: str) -> str:
 
 def input_args(path: Path) -> list[str]:
     # In particular, do not let uploaded playlists cause network or arbitrary local file access.
-    return ['-protocol_whitelist', 'file,pipe', '-format_whitelist', 'mov,matroska,webm,avi,mpegts,mpeg,flv,ogg', '-i', str(path)]
+    return ['-protocol_whitelist', 'file,pipe', '-format_whitelist', 'mov,matroska,webm,avi,mpegts,mpeg,flv,ogg,mp3,wav,flac,aac', '-i', str(path)]
 
 
-def probe(path: Path) -> dict:
+def probe(path: Path, *, allow_audio_only: bool = False) -> dict:
     raw = run([tool('ffprobe'), '-v', 'error', *input_args(path), '-show_streams', '-show_format', '-of', 'json'],
               timeout=60, capture=True)
     try:
         info = json.loads(raw)
-        video = next(s for s in info['streams'] if s['codec_type'] == 'video' and not s.get('disposition', {}).get('attached_pic'))
+        video = next((s for s in info['streams'] if s['codec_type'] == 'video' and not s.get('disposition', {}).get('attached_pic')), None)
         audio = next((s for s in info['streams'] if s['codec_type'] == 'audio'), None)
+        if video is None:
+            if not allow_audio_only or audio is None:
+                raise StopIteration()
+            duration = float(info['format'].get('duration') or audio.get('duration') or 0)
+            if not math.isfinite(duration) or not 0 < duration <= config.MAX_DURATION:
+                raise MediaError(f'Audio duration must be between 0 and {config.MAX_DURATION/3600:g} hours.')
+            return {
+                'duration': round(duration, 3),
+                'width': 1080,
+                'height': 1920,
+                'fps': 30.0,
+                'video_codec': None,
+                'audio_codec': audio['codec_name'],
+                'has_audio': True,
+                'audio_only': True,
+            }
         duration = float(info['format'].get('duration') or video.get('duration') or 0)
         width, height = int(video['width']), int(video['height'])
         for data in video.get('side_data_list', []):
@@ -107,6 +123,26 @@ def probe(path: Path) -> dict:
             'audio_codec': audio['codec_name'] if audio else None, 'has_audio': audio is not None}
 
 
+def make_audio_canvas(source: Path, target: Path, *, width: int = 1080, height: int = 1920,
+                      fps: float = 30.0, start: float | None = None, end: float | None = None,
+                      bg_hex: str = '#0E0E10', cancelled=None) -> Path:
+    clean_hex = f'0x{bg_hex[1:]}' if isinstance(bg_hex, str) and re.fullmatch(r'#[0-9A-Fa-f]{6}', bg_hex) else 'black'
+    cmd = [tool('ffmpeg'), '-hide_banner', '-loglevel', 'error', '-nostdin', '-y',
+           '-f', 'lavfi', '-i', f'color=c={clean_hex}:s={int(width)}x{int(height)}:r={fps:g}']
+    if start is not None and start > 0:
+        cmd += ['-ss', f'{start:.6f}']
+    if end is not None and end > (start or 0):
+        cmd += ['-t', f'{end - (start or 0):.6f}']
+    cmd += [
+        *input_args(source),
+        '-map', '0:v:0', '-map', '1:a:0', '-shortest',
+        '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p',
+        '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', str(target),
+    ]
+    run(cmd, cancelled=cancelled)
+    return target
+
+
 def make_poster(source: Path, target: Path):
     run([tool('ffmpeg'), '-hide_banner', '-loglevel', 'error', '-nostdin', '-y', '-ss', '0',
          *input_args(source), '-frames:v', '1', '-vf', 'scale=640:-2', str(target)], timeout=90)
@@ -118,7 +154,7 @@ _model_lock = threading.Lock()
 
 
 def transcribe(source: Path, working: Path, duration: float, language: str = 'auto',
-               progress=None, cancelled=None) -> dict:
+               progress=None, cancelled=None, *, vocab: str = '', hinglish: bool = False) -> dict:
     if not available_whisper():
         raise MediaError('Local Whisper transcription is unavailable in this runtime. Use an independently prepared local model/runtime, or import a timestamped JSON/SRT transcript, then retry.')
     audio = working / 'audio.wav'
@@ -146,9 +182,18 @@ def transcribe(source: Path, working: Path, duration: float, language: str = 'au
                 _model_signature = signature
         if cancelled and cancelled():
             raise MediaCancelled('Transcription cancelled.')
+        hints = []
+        if hinglish and language == 'hi':
+            from .subtle.hinglish import ROMAN_HINT
+            hints.append(ROMAN_HINT)
+        if vocab and vocab.strip():
+            hints.append('Vocabulary: ' + vocab.strip().rstrip('.') + '.')
+        transcribe_kwargs = {}
+        if hints:
+            transcribe_kwargs['initial_prompt'] = ' '.join(hints)[:400]
         iterator, info = _model.transcribe(str(audio), language=None if language == 'auto' else language,
                                            word_timestamps=True, vad_filter=True, beam_size=5,
-                                           condition_on_previous_text=False)
+                                           condition_on_previous_text=False, **transcribe_kwargs)
         segments = []
         for segment in iterator:
             if cancelled and cancelled():
@@ -215,20 +260,44 @@ def parse_srt(text: str) -> dict:
 
 
 def export_clip(source: Path, directory: Path, settings: dict, transcript: dict | None,
-                source_info: dict, cancelled=None, *, corrections: dict | None = None) -> dict:
+                source_info: dict, cancelled=None, *, corrections: dict | None = None,
+                cache_dir: Path | None = None) -> dict:
+    if settings.get('caption_style') == 'subtle':
+        from .subtle.renderer import export_subtle_clip
+        return export_subtle_clip(
+            source,
+            directory,
+            settings,
+            transcript,
+            source_info,
+            cancelled=cancelled,
+            corrections=corrections,
+            cache_dir=cache_dir,
+        )
     directory.mkdir(parents=True, exist_ok=True)
     start, end = settings['start'], settings['end']
     target, partial = directory / 'clip.mp4', directory / 'clip.partial.mp4'
+    audio_base: Path | None = None
+    working_source = source
+    working_start = start
+    working_info = source_info
+    if source_info.get('audio_only'):
+        audio_base = directory / '_audio_canvas.mp4'
+        out_w, out_h = (1080, 1920) if settings['aspect'] == 'vertical' else (1080, 1920)
+        make_audio_canvas(source, audio_base, start=start, end=end, width=out_w, height=out_h, cancelled=cancelled)
+        working_source = audio_base
+        working_start = 0.0
+        working_info = probe(audio_base)
     filters = []
-    if settings['aspect'] == 'vertical' and settings.get('_reframe_plan'):
+    if settings['aspect'] == 'vertical' and settings.get('_reframe_plan') and not source_info.get('audio_only'):
         from .reframe_render import render_filter
-        filters.extend(render_filter(settings['_reframe_plan'],start,end,directory))
+        filters.extend(render_filter(settings['_reframe_plan'], start, end, directory))
     elif settings['aspect'] == 'vertical':
         # Manual crop position is previewed by the browser; no face tracking is claimed.
-        crop_width = max(2, min(source_info['width'], int(source_info['height'] * 9 / 16)) // 2 * 2)
-        crop_height = max(2, min(source_info['height'], int(source_info['width'] * 16 / 9)) // 2 * 2)
-        x = int((source_info['width'] - crop_width) * settings['crop_x']) // 2 * 2
-        y = (source_info['height'] - crop_height) // 4 * 2
+        crop_width = max(2, min(working_info['width'], int(working_info['height'] * 9 / 16)) // 2 * 2)
+        crop_height = max(2, min(working_info['height'], int(working_info['width'] * 16 / 9)) // 2 * 2)
+        x = int((working_info['width'] - crop_width) * settings['crop_x']) // 2 * 2
+        y = (working_info['height'] - crop_height) // 4 * 2
         filters.extend([f'crop={crop_width}:{crop_height}:{x}:{y}', 'scale=1080:1920:flags=lanczos', 'setsar=1'])
     else:
         filters.extend(['pad=ceil(iw/2)*2:ceil(ih/2)*2', 'setsar=1'])
@@ -236,7 +305,7 @@ def export_clip(source: Path, directory: Path, settings: dict, transcript: dict 
     caption_document = None
     if any(segment.get('words') for segment in segments) and (settings['caption_style'] == 'poppins_highlight' or settings.get('subtitle_style')):
         from .captions import build_caption_document, to_ass, to_srt, to_vtt, font_directory
-        out_width, out_height = (1080, 1920) if settings['aspect'] == 'vertical' else (math.ceil(source_info['width']/2)*2, math.ceil(source_info['height']/2)*2)
+        out_width, out_height = (1080, 1920) if settings['aspect'] == 'vertical' else (math.ceil(working_info['width']/2)*2, math.ceil(working_info['height']/2)*2)
         caption_document = build_caption_document(segments, start, end, out_width, out_height, settings.get('subtitle_style'), corrections)
         captions = to_srt(caption_document)
         (directory / 'captions.ass').write_text(to_ass(caption_document), encoding='utf-8')
@@ -266,8 +335,8 @@ def export_clip(source: Path, directory: Path, settings: dict, transcript: dict 
         if settings['caption_style'] == 'bold':
             style += ',Bold=1,PrimaryColour=&H007DFFCD,Outline=3'
         filters.append(f"subtitles=filename=captions.srt:force_style='{style}'")
-    command = [tool('ffmpeg'), '-hide_banner', '-loglevel', 'error', '-nostdin', '-y', '-ss', f'{start:.6f}',
-               *input_args(source), '-t', f'{end-start:.6f}', '-map', '0:v:0', '-map', '0:a:0?',
+    command = [tool('ffmpeg'), '-hide_banner', '-loglevel', 'error', '-nostdin', '-y', '-ss', f'{working_start:.6f}',
+               *input_args(working_source), '-t', f'{end-start:.6f}', '-map', '0:v:0', '-map', '0:a:0?',
                '-vf', ','.join(filters), '-c:v', 'libx264', '-preset', 'medium', '-crf', '18', '-pix_fmt', 'yuv420p',
                '-threads', '4', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-map_metadata', '-1', str(partial)]
     try:
@@ -276,9 +345,9 @@ def export_clip(source: Path, directory: Path, settings: dict, transcript: dict 
         preset = settings.get('duration_preset')
         if preset in {'20', '30', '45', '60'} and info['duration'] > float(preset) + 1 / max(1, info['fps']) + .000001:
             raise MediaError(f'Ekspor melewati batas {preset} detik dan tidak ditandai siap. Periksa batas kalimat atau pendekkan akhir klip.')
-        expected = (1080, 1920) if settings['aspect'] == 'vertical' else (math.ceil(source_info['width']/2)*2, math.ceil(source_info['height']/2)*2)
+        expected = (1080, 1920) if settings['aspect'] == 'vertical' else (math.ceil(working_info['width']/2)*2, math.ceil(working_info['height']/2)*2)
         if ((info['width'], info['height']) != expected or info['video_codec'] != 'h264'
-                or source_info['has_audio'] and not info['has_audio']
+                or working_info['has_audio'] and not info['has_audio']
                 or abs(info['duration'] - (end-start)) > .35):
             raise MediaError('Export verification failed. No download is marked ready; retry or check source timestamps.')
         if cancelled and cancelled():
@@ -287,3 +356,5 @@ def export_clip(source: Path, directory: Path, settings: dict, transcript: dict 
         return info
     finally:
         partial.unlink(missing_ok=True)
+        if audio_base is not None:
+            audio_base.unlink(missing_ok=True)

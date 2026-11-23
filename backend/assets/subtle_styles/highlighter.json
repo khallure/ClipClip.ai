@@ -1,0 +1,61 @@
+{
+  "name": "highlighter",
+  "label": "Highlighter",
+  "description": "Bold caps with one flat box behind the word being spoken, hopping from word to word. A finished word turns lime; the hot word comes alone, large.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Montserrat ExtraBold",
+    "file": "Montserrat-ExtraBold.ttf",
+    "weight": 800
+  },
+  "case": "upper",
+  "size": 3.8,
+  "wideScale": 1.5,
+  "lineHeight": 1.2,
+  "letterSpacing": 0,
+  "color": "#FFFFFF",
+  "activeColor": "#5A12D0",
+  "shadow": {
+    "x": 0,
+    "y": 0.15,
+    "blur": 0.7,
+    "color": "rgba(0,0,0,0.55)"
+  },
+  "emphasis": {
+    "color": {
+      "auto": "accent",
+      "fallback": "#45F715"
+    },
+    "scale": 1.9
+  },
+  "position": {
+    "x": 50,
+    "y": 56,
+    "marginX": 8
+  },
+  "page": {
+    "maxLines": 1,
+    "minFrames": 10,
+    "maxFrames": 80,
+    "gapBreakMs": 350,
+    "maxWords": 4,
+    "maxCharsPerLine": 24,
+    "maxCharsPerLineWide": 40
+  },
+  "anim": {
+    "type": "highlighter",
+    "padX": 0.16,
+    "padY": 0.26,
+    "gap": 1.45,
+    "handoff": 2
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "halo",
+    "max": 1
+  }
+}

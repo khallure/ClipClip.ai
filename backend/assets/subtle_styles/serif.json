@@ -1,0 +1,54 @@
+{
+  "name": "serif",
+  "label": "Serif",
+  "description": "Display serif italic filled with a top-lit silver gradient; quiet and luxurious.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Playfair Display Black Italic",
+    "file": "PlayfairDisplay-BlackItalic.ttf",
+    "weight": 900
+  },
+  "case": "sentence",
+  "size": 6.6,
+  "wideScale": 1.2,
+  "lineHeight": 1.2,
+  "letterSpacing": -0.01,
+  "color": "#FFFFFF",
+  "shadow": null,
+  "emphasis": {
+    "gradTop": "#FFEDB0",
+    "gradBottom": "#C98A1E"
+  },
+  "position": {
+    "y": 60,
+    "marginX": 8
+  },
+  "page": {
+    "maxWords": 4,
+    "maxCharsPerLine": 22,
+    "maxCharsPerLineWide": 40,
+    "maxLines": 1,
+    "minFrames": 16,
+    "maxFrames": 90,
+    "gapBreakMs": 400
+  },
+  "anim": {
+    "type": "serif",
+    "gradTop": "#FFFFFF",
+    "gradBottom": "#C4C4C4",
+    "wordIn": 4,
+    "wordBlur": 6,
+    "pageOut": 4,
+    "shadowBlur": 22,
+    "shadowColor": "rgba(0,0,0,0.85)"
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "halo",
+    "max": 1
+  }
+}

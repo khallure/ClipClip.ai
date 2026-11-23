@@ -1,0 +1,60 @@
+{
+  "name": "accent",
+  "label": "Accent",
+  "description": "Pale-lime sans in very short pages, with the key word in a light serif italic; soft fade with a small drift.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Inter Medium",
+    "file": "Inter-Medium.ttf",
+    "weight": 500
+  },
+  "emphasisFont": {
+    "family": "Instrument Serif Italic",
+    "file": "InstrumentSerif-Italic.ttf",
+    "weight": 400
+  },
+  "case": "lower",
+  "size": 5.4,
+  "wideScale": 1.3,
+  "lineHeight": 1.2,
+  "letterSpacing": 0,
+  "color": {
+    "auto": "accent",
+    "fallback": "#D8F9AB"
+  },
+  "shadow": {
+    "x": 0,
+    "y": 0.2,
+    "blur": 0.8,
+    "color": "rgba(0,0,0,0.55)"
+  },
+  "position": {
+    "y": 72,
+    "marginX": 8
+  },
+  "page": {
+    "maxWords": 3,
+    "maxCharsPerLine": 22,
+    "maxCharsPerLineWide": 34,
+    "maxLines": 1,
+    "minFrames": 10,
+    "maxFrames": 75,
+    "gapBreakMs": 300
+  },
+  "anim": {
+    "type": "accent",
+    "pageIn": 4,
+    "pageOut": 3,
+    "drift": 4,
+    "italicScale": 1.38
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "halo",
+    "max": 0.9
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "name": "sticker",
+  "label": "Sticker",
+  "description": "Rounded pink bubbles, one per line, each new line offset to the right of the last and stacked like typed messages; the stack tilts a little more on every page. Words are dark until spoken, then white.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Inter Bold",
+    "file": "Inter-Bold.ttf",
+    "weight": 700
+  },
+  "case": "sentence",
+  "size": 4.2,
+  "wideScale": 1.6,
+  "lineHeight": 1.3,
+  "letterSpacing": 0,
+  "color": "#FFFFFF",
+  "dimColor": "rgba(27,30,29,0.85)",
+  "shadow": null,
+  "container": {
+    "kind": "bubble",
+    "fill": "#DC2C5B",
+    "padX": 0.5,
+    "height": 1.5,
+    "radius": 0.35,
+    "offset": 0.25
+  },
+  "emphasis": {
+    "fill": "#FF3F7F",
+    "scale": 1.2
+  },
+  "position": {
+    "x": 50,
+    "y": 62,
+    "marginX": 7
+  },
+  "page": {
+    "maxLines": 3,
+    "minFrames": 20,
+    "maxFrames": 150,
+    "gapBreakMs": 450,
+    "maxWords": 7,
+    "maxCharsPerLine": 12,
+    "maxCharsPerLineWide": 20
+  },
+  "anim": {
+    "type": "sticker"
+  },
+  "behind": {
+    "enabled": false
+  }
+}

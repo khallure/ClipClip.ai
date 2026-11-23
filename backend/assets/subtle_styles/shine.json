@@ -1,0 +1,55 @@
+{
+  "name": "shine",
+  "label": "Shine",
+  "description": "Serif italic in one accent colour; a diagonal band of light sweeps across each word, then a soft glow fades.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Playfair Display Black Italic",
+    "file": "PlayfairDisplay-BlackItalic.ttf",
+    "weight": 900
+  },
+  "case": "sentence",
+  "size": 6.4,
+  "wideScale": 1.2,
+  "lineHeight": 1.2,
+  "letterSpacing": -0.01,
+  "color": {
+    "auto": "accent2",
+    "fallback": "#05B2FA"
+  },
+  "shadow": null,
+  "position": {
+    "y": 60,
+    "marginX": 8
+  },
+  "page": {
+    "maxWords": 4,
+    "maxCharsPerLine": 22,
+    "maxCharsPerLineWide": 40,
+    "maxLines": 1,
+    "minFrames": 16,
+    "maxFrames": 90,
+    "gapBreakMs": 400
+  },
+  "anim": {
+    "type": "shine",
+    "lightColor": "#FFFFFF",
+    "band": 0.6,
+    "sweep": 12,
+    "delay": 1,
+    "glow": 12,
+    "glowBlur": 18,
+    "wordIn": 2,
+    "pageOut": 3,
+    "shadowBlur": 26
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "halo",
+    "max": 1
+  }
+}

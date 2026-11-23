@@ -1,0 +1,23 @@
+{
+  "name": "split",
+  "label": "Split",
+  "description": "Words alternate to the two sides of the speaker and step down around the head like a staircase, never over the face.",
+  "engines": ["remotion"],
+  "subject": true,
+  "font": {"family": "Inter Bold", "file": "Inter-Bold.ttf", "weight": 700},
+  "case": "lower",
+  "size": 4.6,
+  "wideScale": 1.3,
+  "lineHeight": 1.2,
+  "letterSpacing": 0,
+  "color": "#FFFFFF",
+  "shadow": {"x": 0, "y": 0.15, "blur": 1.2, "color": "rgba(0,0,0,0.55)"},
+  "emphasis": {"color": {"auto": "accent", "fallback": "#FFE066"}},
+  "position": {"y": 26, "marginX": 6, "flex": 0},
+  "page": {"maxWords": 4, "maxCharsPerLine": 40, "maxCharsPerLineWide": 60, "maxLines": 1, "minFrames": 14, "maxFrames": 90, "gapBreakMs": 350},
+  "anim": {
+    "type": "split", "serifFont": {"family": "Instrument Serif Italic", "file": "InstrumentSerif-Italic.ttf", "weight": 400},
+    "keyScale": 1.7, "faceGap": 0.016, "rowGap": 1.45, "wordIn": 5, "slide": 0.05, "pageOut": 4
+  },
+  "legibility": {"mode": "halo", "max": 1}
+}

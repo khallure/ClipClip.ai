@@ -1,0 +1,59 @@
+{
+  "name": "title",
+  "label": "Title",
+  "description": "A typed title whose letter spacing collapses as the letters arrive, with a small handwritten note under it.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Inter SemiBold",
+    "file": "Inter-SemiBold.ttf",
+    "weight": 600
+  },
+  "noteFont": {
+    "family": "Caveat SemiBold",
+    "file": "Caveat-SemiBold.ttf",
+    "weight": 600
+  },
+  "case": "sentence",
+  "size": 5.2,
+  "wideScale": 1.3,
+  "lineHeight": 1.2,
+  "letterSpacing": 0,
+  "color": "#FDFEFE",
+  "activeColor": "#FFFFFF",
+  "shadow": {
+    "x": 0,
+    "y": 0.22,
+    "blur": 0.9,
+    "color": "rgba(0,0,0,0.5)"
+  },
+  "emphasis": {
+    "color": "#FFC94D"
+  },
+  "position": {
+    "y": 17,
+    "marginX": 8
+  },
+  "page": {
+    "maxWords": 4,
+    "maxCharsPerLine": 40,
+    "maxCharsPerLineWide": 60,
+    "maxLines": 1,
+    "minFrames": 30,
+    "maxFrames": 120,
+    "gapBreakMs": 450
+  },
+  "anim": {
+    "type": "title",
+    "trackFrom": 0.5,
+    "typeMax": 18,
+    "noteTypeMax": 14,
+    "noteSize": 3.4,
+    "slideX": 4,
+    "pageOut": 5
+  },
+  "behind": {
+    "enabled": false
+  }
+}

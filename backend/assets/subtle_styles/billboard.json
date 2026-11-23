@@ -1,0 +1,91 @@
+{
+  "name": "billboard",
+  "label": "Billboard",
+  "description": "A fat lowercase serif, one or two words so big they bleed off the frame. Three flat tones swap between text and background; the pair changes every two beats.",
+  "group": "music",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Abril Fatface",
+    "file": "AbrilFatface-Regular.ttf",
+    "weight": 400
+  },
+  "case": "lower",
+  "size": 20,
+  "wideScale": 1,
+  "lineHeight": 1,
+  "letterSpacing": -0.01,
+  "color": "#952850",
+  "position": {
+    "y": 50,
+    "marginX": 4
+  },
+  "emphasis": {
+    "fill": 1.25
+  },
+  "page": {
+    "unit": "line",
+    "linesPerPage": 1,
+    "maxWords": 3,
+    "maxCharsPerLine": 18,
+    "maxCharsPerLineWide": 12,
+    "maxLines": 1,
+    "snap": "beat",
+    "hold": true,
+    "minFrames": 10,
+    "maxFrames": 120,
+    "gapBreakMs": 500
+  },
+  "anim": {
+    "type": "billboard",
+    "tones": {
+      "cream": "#FCECCF",
+      "olive": "#DDD273",
+      "pink": "#952850"
+    },
+    "pairs": [
+      [
+        "cream",
+        "pink"
+      ],
+      [
+        "olive",
+        "pink"
+      ],
+      [
+        "pink",
+        "cream"
+      ],
+      [
+        "pink",
+        "olive"
+      ]
+    ],
+    "flipBeats": 2,
+    "popFrames": 4,
+    "popFrom": 0.4,
+    "fillBig": 1.25,
+    "fillSmall": 0.62,
+    "maxBig": 52,
+    "maxSmall": 13,
+    "spots": [
+      "tl",
+      "br",
+      "c"
+    ],
+    "tallBig": 1.1,
+    "tallSmall": 0.67,
+    "tallStack": 0.85,
+    "tallGap": 0.08,
+    "tallMin": 0.54,
+    "tallStretch": 1.05,
+    "tallEmWeight": 1
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "none"
+  }
+}

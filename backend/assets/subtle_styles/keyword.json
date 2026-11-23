@@ -1,0 +1,81 @@
+{
+  "name": "keyword",
+  "label": "Keyword",
+  "description": "One giant pale-lime keyword behind the speaker, the other words small and stacked beside it.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Inter SemiBold",
+    "file": "Inter-SemiBold.ttf",
+    "weight": 600
+  },
+  "case": "lower",
+  "size": 2.7,
+  "wideScale": 1.5,
+  "lineHeight": 1.4,
+  "letterSpacing": 0,
+  "color": "#F2F4EE",
+  "shadow": {
+    "x": 0,
+    "y": 0.16,
+    "blur": 0.7,
+    "color": "rgba(0,0,0,0.28)"
+  },
+  "emphasis": {
+    "color": {
+      "auto": "accent",
+      "fallback": "#D6FCA5"
+    }
+  },
+  "position": {
+    "y": 50,
+    "marginX": 6
+  },
+  "page": {
+    "maxWords": 4,
+    "maxCharsPerLine": 30,
+    "maxCharsPerLineWide": 50,
+    "maxLines": 1,
+    "minFrames": 12,
+    "maxFrames": 90,
+    "gapBreakMs": 350
+  },
+  "anim": {
+    "type": "keyword",
+    "bigIn": 5,
+    "bigOut": 2,
+    "slide": 9,
+    "overshoot": 1.1,
+    "smallIn": 4,
+    "smallRise": 6
+  },
+  "behind": {
+    "enabled": true,
+    "bigY": 26,
+    "frontY": 58,
+    "frontWidth": 78,
+    "bigWidth": 90,
+    "bigMaxSize": 22,
+    "bigOpacity": 1,
+    "bigColor": {
+      "auto": "accent",
+      "fallback": "#D6FCA5"
+    },
+    "bigFont": {
+      "family": "Inter Bold",
+      "file": "Inter-Bold.ttf",
+      "weight": 700
+    },
+    "maxBigWords": 1,
+    "maxChars": 9,
+    "minHoldMs": 900,
+    "everyMs": 1700,
+    "minGapMs": 150,
+    "minVisible": 0.55
+  },
+  "legibility": {
+    "mode": "halo",
+    "max": 1
+  }
+}

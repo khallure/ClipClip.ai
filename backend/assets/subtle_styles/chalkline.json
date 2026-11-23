@@ -1,0 +1,112 @@
+{
+  "name": "chalkline",
+  "label": "Chalkline",
+  "description": "Hand-written lines that write on, left to right, over a dark chalkboard. Lines pile up down the page and indent in steps, then the page clears. The key word is bigger and gets a hand-drawn underline. Variant marker: coloured marker on paper.",
+  "group": "music",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Gloria Hallelujah",
+    "file": "GloriaHallelujah-Regular.ttf",
+    "weight": 400
+  },
+  "emphasisFont": {
+    "family": "Reenie Beanie",
+    "file": "ReenieBeanie-Regular.ttf",
+    "weight": 400
+  },
+  "case": "sentence",
+  "size": 7.4,
+  "wideScale": 1.2,
+  "lineHeight": 2.55,
+  "letterSpacing": 0,
+  "color": "#F2EEE6",
+  "position": {
+    "x": 50,
+    "y": 17,
+    "marginX": 7
+  },
+  "emphasis": {
+    "scale": 1.8,
+    "underline": true,
+    "caps": true
+  },
+  "page": {
+    "unit": "line",
+    "linesPerPage": 4,
+    "maxWords": 5,
+    "maxCharsPerLine": 15,
+    "maxCharsPerLineWide": 40,
+    "maxLines": 4,
+    "snap": "bar",
+    "hold": true,
+    "minFrames": 20,
+    "maxFrames": 400,
+    "gapBreakMs": 1500,
+    "blockGapMs": 3000
+  },
+  "anim": {
+    "type": "chalkline",
+    "bg": "#070100",
+    "vignette": 0.0,
+    "grain": 0.28,
+    "boilFps": 12,
+    "wobble": 3.2,
+    "stepFrames": 5,
+    "minSteps": 2,
+    "maxSteps": 6,
+    "indent": [
+      0,
+      7,
+      14,
+      7
+    ],
+    "underlineFrames": 9,
+    "underlineSteps": 3,
+    "clearFrames": 10,
+    "inks": null
+  },
+  "variants": {
+    "marker": {
+      "font": {
+        "family": "Caveat SemiBold",
+        "file": "Caveat-SemiBold.ttf",
+        "weight": 600
+      },
+      "emphasisFont": {
+        "family": "Caveat SemiBold",
+        "file": "Caveat-SemiBold.ttf",
+        "weight": 600
+      },
+      "size": 8.2,
+      "lineHeight": 2.4,
+      "color": "#2E5FA8",
+      "emphasis": {
+        "scale": 1.5,
+        "underline": true,
+        "caps": true
+      },
+      "anim": {
+        "bg": "#E9E5DD",
+        "vignette": 0.42,
+        "grain": 0,
+        "wobble": 2.2,
+        "inks": [
+          "#E88A1A",
+          "#C0392B",
+          "#3F8F3F",
+          "#2E5FA8",
+          "#7A4CA0"
+        ],
+        "clearFrames": 1
+      }
+    }
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "none"
+  }
+}

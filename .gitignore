@@ -19,6 +19,8 @@
 .venv-*/
 venv/
 node_modules/
+subtle-renderer/bundle/
+subtle-renderer/.browser/
 .next/
 out/
 dist/
@@ -72,6 +74,7 @@ Thumbs.db
 *.safetensors
 *.onnx
 !/backend/assets/models/face_detection_yunet_2023mar.onnx
+!/backend/assets/models/segmentation/selfie_segmentation.onnx
 *.zip
 *.7z
 *.tar.gz

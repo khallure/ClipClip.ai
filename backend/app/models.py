@@ -58,9 +58,10 @@ class AnalysisSettings(StrictModel):
     min_duration: float = Field(default=20, ge=5, le=90)
     max_duration: float = Field(default=90, ge=5, le=90)
     target_duration: float = Field(default=45, ge=5, le=90)
-    language: Literal['auto', 'id', 'en'] = 'auto'
+    language: Literal['auto', 'id', 'en', 'es', 'hi'] = 'auto'
     manual_start: float | None = Field(default=None, ge=0)
     manual_end: float | None = Field(default=None, gt=0)
+    vocab: str = Field(default='', max_length=400)
 
     @model_validator(mode='after')
     def intervals(self):
@@ -78,13 +79,81 @@ class AnalysisSettings(StrictModel):
         return self
 
 
+class SubtleTweaks(StrictModel):
+    accent: str | None = Field(default=None, pattern=r'^#[0-9A-Fa-f]{6}$')
+    size_pct: float | None = Field(default=None, ge=50, le=180)
+    y: float | None = Field(default=None, ge=5, le=92)
+    case: Literal['upper', 'sentence', 'lower'] | None = None
+    shadow: bool | None = None
+
+
+class SubtleManualHighlight(StrictModel):
+    page: int = Field(ge=0, strict=True)
+    word_index: int = Field(ge=0, strict=True)
+    reason: str = Field(default='dipilih pengguna', max_length=160)
+
+
+class SubtleManualDrop(StrictModel):
+    page: int = Field(ge=0, strict=True)
+    word_index: int = Field(ge=0, strict=True)
+
+
+class SubtleOptions(StrictModel):
+    style: str = Field(default='glide', pattern=r'^[a-z0-9][a-z0-9_-]{0,40}$')
+    variant: str = Field(default='', max_length=40)
+    emphasis: Literal['auto', 'numbers', 'off'] = 'auto'
+    emphasis_words: list[str] = Field(default_factory=list, max_length=50)
+    numbers: Literal['auto', 'indonesian', 'western', 'indian', 'european', 'off'] = 'auto'
+    behind: Literal['auto', 'on', 'off'] = 'auto'
+    matte_quality: Literal['fast', 'balanced', 'accurate'] = 'balanced'
+    placement: Literal['auto', 'off'] = 'auto'
+    cuts: Literal['auto', 'off'] = 'auto'
+    legibility: Literal['auto', 'off'] = 'auto'
+    palette: Literal['auto', 'off'] = 'auto'
+    clean_fillers: bool = False
+    hinglish: bool = False
+    max_words: int | None = Field(default=None, ge=1, le=12, strict=True)
+    canvas: Literal['9:16', '16:9', '1:1', '4:5'] = '9:16'
+    canvas_bg: str = Field(default='#0E0E10', pattern=r'^#[0-9A-Fa-f]{6}$')
+    vocab: str = Field(default='', max_length=400)
+    replacements: dict[str, str] = Field(default_factory=dict)
+    lyrics: str = Field(default='', max_length=50000)
+    tweaks: SubtleTweaks = Field(default_factory=SubtleTweaks)
+    manual_picks: list[SubtleManualHighlight] = Field(default_factory=list, max_length=500)
+    manual_drops: list[SubtleManualDrop] = Field(default_factory=list, max_length=500)
+    clear_auto_emphasis: bool = False
+    page_edits: dict[str, str] = Field(default_factory=dict)
+    custom_recipe: dict | None = None
+
+
+class SubtlePreviewSettings(StrictModel):
+    start: float = Field(ge=0)
+    end: float = Field(gt=0)
+    aspect: Literal['original', 'vertical'] = 'original'
+    crop_x: float = Field(default=.5, ge=0, le=1)
+    options: SubtleOptions = Field(default_factory=SubtleOptions)
+
+    @model_validator(mode='after')
+    def interval(self):
+        if not 0 < self.end - self.start <= 600:
+            raise ValueError('Pilih rentang subtitle maksimal 10 menit dengan akhir setelah awal.')
+        return self
+
+
+class AlignCaptionsRequest(StrictModel):
+    vocab: str = Field(default='', max_length=400)
+    hinglish: bool = False
+    language: Literal['auto', 'id', 'en', 'es', 'hi'] = 'auto'
+
+
 class ExportSettings(StrictModel):
     start: float = Field(ge=0)
     end: float = Field(gt=0)
     aspect: Literal['original', 'vertical'] = 'original'
     crop_x: float = Field(default=.5, ge=0, le=1)
-    caption_style: Literal['none', 'clean', 'bold', 'poppins_highlight'] = 'none'
+    caption_style: Literal['none', 'clean', 'bold', 'poppins_highlight', 'subtle'] = 'none'
     subtitle_style: CaptionStyle = Field(default_factory=CaptionStyle)
+    subtle: SubtleOptions | None = None
     duration_preset: DurationPreset | None = None
     reframe_id: str | None = Field(default=None, pattern=r'^[a-f0-9]{32}$')
 

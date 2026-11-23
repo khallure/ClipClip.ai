@@ -231,7 +231,7 @@ function browser(token) {
   });
   browserSession.on('will-download', (event, item, contents) => {
     const url = new URL(item.getURL());
-    const allowed = /^\/api\/jobs\/[a-f\d]{32}\/exports\/[a-f\d]{32}\/(file|captions\.(srt|ass|vtt))$/.test(url.pathname) ||
+    const allowed = /^\/api\/jobs\/[a-f\d]{32}\/exports\/[a-f\d]{32}\/(file|captions\.(srt|ass|vtt|json)|preview\.jpg)$/.test(url.pathname) ||
       url.pathname === '/api/models/whisper/offline-package';
     if (contents?.id !== contentsId || !isLocalUi(url.href) || !allowed || url.search) {
       event.preventDefault(); return;

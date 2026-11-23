@@ -1,0 +1,55 @@
+{
+  "name": "block",
+  "label": "Block",
+  "description": "Every line in its own warm coloured block with depth; lines rise in with motion blur and pile up as a stack.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Montserrat ExtraBold",
+    "file": "Montserrat-ExtraBold.ttf",
+    "weight": 800
+  },
+  "case": "upper",
+  "size": 4.3,
+  "wideScale": 1.2,
+  "lineHeight": 1.3,
+  "letterSpacing": 0.01,
+  "color": "#FDFCF9",
+  "shadow": null,
+  "container": {
+    "kind": "block",
+    "fill": "#FB7207",
+    "padX": 0.38,
+    "height": 1.18,
+    "radius": 4,
+    "align": "right"
+  },
+  "emphasis": {
+    "fill": "#17171B"
+  },
+  "position": {
+    "y": 19,
+    "marginX": 5
+  },
+  "page": {
+    "maxWords": 6,
+    "maxCharsPerLine": 14,
+    "maxCharsPerLineWide": 22,
+    "maxLines": 3,
+    "minFrames": 20,
+    "maxFrames": 110,
+    "gapBreakMs": 350
+  },
+  "anim": {
+    "type": "block",
+    "lineIn": 5,
+    "rise": 26,
+    "blur": 7,
+    "pageOut": 3,
+    "exitDrop": 34
+  },
+  "behind": {
+    "enabled": false
+  }
+}

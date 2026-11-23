@@ -12,19 +12,27 @@ from pathlib import Path
 
 from . import config
 
-from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import Body, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, PlainTextResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.concurrency import run_in_threadpool
 
 from . import media
-from .models import AnalysisSettings, IngestSettings, CreateJob, ExportSettings, CaptionPreviewSettings, CaptionCorrections, validate_transcript
+from .models import (
+    AlignCaptionsRequest, AnalysisSettings, IngestSettings, CreateJob,
+    ExportSettings, CaptionPreviewSettings, CaptionCorrections, SubtlePreviewSettings,
+    validate_transcript,
+)
 from .caption_state import caption_transcript, corrections, has_words
 from .captions import build_caption_document
+from .subtle import styles as subtle_styles, pipeline as subtle_pipeline, renderer as subtle_renderer
+from .subtle.group import to_srt as subtle_to_srt, to_vtt as subtle_to_vtt
+from .runtime_profile import checked_path
 from .ingestion import VideoSourceIngestor
 from .source_progress import fresh_progress, update_progress
 from .model_provisioning import create_provisioner, register_model_routes, load_manifest
+from .subtle_models import create_segmentation_manager, register_segmentation_routes
 from .updater import create_updater, register_update_routes
 from .version import APP_VERSION
 from .reframe_models import ReframeInterval, ReframeRequest, ReframePlan
@@ -36,6 +44,7 @@ for noisy_logger in ('httpx', 'httpx2', 'httpcore', 'httpcore2'):
     logging.getLogger(noisy_logger).setLevel(logging.WARNING)
 log = logging.getLogger('podcut.pipeline')
 VIDEO_EXTENSIONS = {'.mp4', '.mov', '.mkv', '.webm', '.avi', '.m4v', '.mpeg', '.mpg', '.ts', '.flv', '.ogg'}
+AUDIO_EXTENSIONS = {'.mp3', '.wav', '.m4a', '.aac', '.flac'}
 
 
 class BodyLimitExceeded(Exception):
@@ -149,7 +158,7 @@ class Pipeline:
                 elif task['type'] == 'export':
                     self.export(ident, task, cancelled)
                 elif task['type'] == 'align_captions':
-                    self.align_captions(ident, cancelled)
+                    self.align_captions(ident, cancelled, settings=task.get('settings'))
                 elif task['type'] == 'ingest':
                     self.ingest(ident, task['settings'], cancelled)
                 elif task['type'] == 'reframe':
@@ -324,7 +333,8 @@ class Pipeline:
             def transcription_progress(p, message):
                 self.store.update(ident, progress=round(p * .6, 1), message=message)
             transcript = media.transcribe(directory / job['_source'], directory, job['media']['duration'],
-                                         requested_language, transcription_progress, cancelled)
+                                         requested_language, transcription_progress, cancelled,
+                                         vocab=settings.get('vocab', ''))
             if cancelled():
                 raise media.MediaCancelled('Processing cancelled.')
             write_json(transcript_path, transcript)
@@ -375,7 +385,11 @@ class Pipeline:
         transcript_path = directory / 'transcript.json'
         transcript = caption_transcript(directory)
         caption_edits = corrections(directory)
-        extra = {'corrections': caption_edits} if caption_edits or settings['caption_style'] == 'poppins_highlight' else {}
+        extra = {}
+        if caption_edits or settings['caption_style'] in {'poppins_highlight', 'subtle'}:
+            extra['corrections'] = caption_edits
+        if settings['caption_style'] == 'subtle':
+            extra['cache_dir'] = directory / 'subtle_cache'
         if settings.get('_reframe_plan'):
             write_json(directory/'exports'/task['export_id']/'reframe_plan.json',settings['_reframe_plan'])
         info = media.export_clip(directory / job['_source'], directory / 'exports' / task['export_id'], settings,
@@ -387,12 +401,16 @@ class Pipeline:
             (export_directory / 'clip.mp4').unlink(missing_ok=True)
             raise
         has_captions = bool((export_directory / 'captions.srt').read_text(encoding='utf-8').strip())
+        has_preview = (export_directory / 'preview.jpg').is_file()
+        has_subtle_json = (export_directory / 'captions.json').is_file()
         with self.store.lock:
             job = self.store.get(ident)
             for export in job['exports']:
                 if export['id'] == task['export_id']:
                     export.update(status='ready', error=None, width=info['width'], height=info['height'],
-                                  media=info, filename='clip.mp4', has_captions=has_captions)
+                                  media=info, filename='clip.mp4', has_captions=has_captions,
+                                  has_preview=has_preview, has_subtle_json=has_subtle_json,
+                                  subtle_qa=info.get('subtle_qa'))
             job.update(status='ready', stage='complete', progress=100, error=None,
                        message='Export verified. Your MP4' + (' and subtitles are' if has_captions else ' is') + ' ready to download.')
             if (job.get('auto_export') or {}).get('export_id') == task['export_id']:
@@ -400,10 +418,11 @@ class Pipeline:
             self.store.save(job)
         log.info('job=%s export=%s verified %dx%d', ident, task['export_id'], info['width'], info['height'])
 
-    def align_captions(self, ident, cancelled, *, finish_ready=True):
+    def align_captions(self, ident, cancelled, *, finish_ready=True, settings: dict | None = None):
         job = self.store.get(ident)
         directory = self.store.directory(ident)
-        if has_words(caption_transcript(directory)):
+        opts = settings or {}
+        if has_words(caption_transcript(directory)) and not opts.get('vocab') and not opts.get('hinglish'):
             self.store.update(ident, status='ready' if finish_ready else 'analyzing',
                               stage='captions_ready' if finish_ready else 'preparing_export', progress=100 if finish_ready else 95, error=None,
                               message='Waktu subtitle per kata sudah tersedia dan digunakan kembali.')
@@ -418,7 +437,12 @@ class Pipeline:
         try:
             def progress(value, message):
                 self.store.update(ident, progress=value, message=message)
-            transcript = media.transcribe(directory / job['_source'], working, job['media']['duration'], 'auto', progress, cancelled)
+            lang = opts.get('language') or 'auto'
+            transcript = media.transcribe(
+                directory / job['_source'], working, job['media']['duration'],
+                lang, progress, cancelled,
+                vocab=opts.get('vocab', ''), hinglish=bool(opts.get('hinglish')),
+            )
             if cancelled():
                 raise media.MediaCancelled('Penyelarasan subtitle dibatalkan.')
             if not has_words(transcript):
@@ -469,6 +493,8 @@ def create_app(data_dir: Path | None = None):
     pipeline = Pipeline(store)
     model_manager = None
     model_lock = threading.Lock()
+    seg_manager = None
+    seg_lock = threading.Lock()
     update_manager = None
     update_lock = threading.Lock()
 
@@ -478,6 +504,13 @@ def create_app(data_dir: Path | None = None):
             if model_manager is None:
                 model_manager = create_provisioner()
             return model_manager
+
+    def segmentation_models():
+        nonlocal seg_manager
+        with seg_lock:
+            if seg_manager is None:
+                seg_manager = create_segmentation_manager()
+            return seg_manager
 
     def updater():
         nonlocal update_manager
@@ -492,6 +525,8 @@ def create_app(data_dir: Path | None = None):
         yield
         if update_manager is not None:
             update_manager.close()
+        if seg_manager is not None:
+            seg_manager.close()
         if model_manager is not None:
             model_manager.close()
         pipeline.close()
@@ -499,6 +534,7 @@ def create_app(data_dir: Path | None = None):
     app = FastAPI(title='ClipClip.ai', version=APP_VERSION, lifespan=lifespan)
     app.state.store, app.state.pipeline = store, pipeline
     register_model_routes(app, models)
+    register_segmentation_routes(app, segmentation_models)
     register_update_routes(app, updater)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['localhost', '127.0.0.1', '[::1]', 'testserver'])
 
@@ -563,6 +599,8 @@ def create_app(data_dir: Path | None = None):
                 'whisper_model': config.WHISPER_MODEL, 'max_upload_mb': config.MAX_UPLOAD_MB,
                 'storage_limit_gb': config.STORAGE_LIMIT_GB, 'youtube_ingest': pipeline.ingestor.capabilities(),
                 'reframe': reframe_capabilities(),
+                'segmentation': segmentation_models().status(),
+                'renderer': subtle_renderer.renderer_capabilities(),
                 'app_version': APP_VERSION,
                 'updates': updater().status(),
                 'gemini': ai['provider'] == 'gemini' and ai['configured'], 'ai': ai}
@@ -590,10 +628,10 @@ def create_app(data_dir: Path | None = None):
             if job.get('_source'):
                 raise HTTPException(409, 'This project already has a source. Create a new project for a different file.')
             suffix = Path(file.filename or '').suffix.lower()
-            if suffix not in VIDEO_EXTENSIONS:
-                raise HTTPException(422, 'Unsupported source type. Attach MP4, MOV, MKV, WEBM or another supported video container.')
+            if suffix not in (VIDEO_EXTENSIONS | AUDIO_EXTENSIONS):
+                raise HTTPException(422, 'Unsupported source type. Attach MP4, MOV, MKV, WEBM, MP3, WAV, M4A, FLAC atau container media didukung.')
             store.update(ident, status='probing', stage='uploading', progress=None, error=None, source_error=None,
-                         ingestion=None, source_cache_hit=False, auto_export=None, message='Receiving and validating source video.')
+                         ingestion=None, source_cache_hit=False, auto_export=None, message='Receiving and validating source media.')
         directory = store.directory(ident)
         temp = directory / f'source.partial{suffix}'
         count, checked = 0, 0
@@ -609,11 +647,12 @@ def create_app(data_dir: Path | None = None):
                         store.ensure_capacity()
                         checked = count
             store.ensure_capacity()
-            info = await run_in_threadpool(media.probe, temp)
+            allow_audio = suffix in AUDIO_EXTENSIONS or suffix == '.ogg'
+            info = await run_in_threadpool(lambda: media.probe(temp, allow_audio_only=allow_audio))
             source_name = f'source{suffix}'
             temp.replace(directory / source_name)
             warnings = []
-            if info['video_codec'] not in {'h264', 'vp8', 'vp9', 'av1'} or info['audio_codec'] not in {None, 'aac', 'opus', 'vorbis', 'mp3'}:
+            if not info.get('audio_only') and (info['video_codec'] not in {'h264', 'vp8', 'vp9', 'av1'} or info['audio_codec'] not in {None, 'aac', 'opus', 'vorbis', 'mp3'}):
                 warnings.append('Source codec may not play in this browser. Analysis/export remain available; H.264/AAC MP4 is recommended for preview.')
             if not info['has_audio']:
                 warnings.append('Source has no audio. Import a timestamped transcript for recommendations.')
@@ -624,10 +663,11 @@ def create_app(data_dir: Path | None = None):
             if job['title'] == 'Untitled episode':
                 job['title'] = Path(job['source_name']).stem[:160]
             store.save(job)
-            try:
-                await run_in_threadpool(media.make_poster, directory / source_name, directory / 'poster.jpg')
-            except media.MediaError:
-                log.info('job=%s poster unavailable; video retained', ident)
+            if not info.get('audio_only'):
+                try:
+                    await run_in_threadpool(media.make_poster, directory / source_name, directory / 'poster.jpg')
+                except media.MediaError:
+                    log.info('job=%s poster unavailable; video retained', ident)
             return store.public(job)
         except (media.MediaError, ValueError, HTTPException, OSError) as exc:
             message = ('Could not save the source. Check available disk space and folder permissions, then attach it again.'
@@ -710,14 +750,120 @@ def create_app(data_dir: Path | None = None):
             write_json(store.directory(ident) / 'caption_corrections.json', values)
             return {'saved': True}
 
+    @app.get('/api/subtle/styles')
+    def get_subtle_styles():
+        return {
+            'styles': subtle_styles.list_styles(),
+            'segmentation': segmentation_models().status(),
+            'renderer': subtle_renderer.renderer_capabilities(),
+        }
+
+    @app.post('/api/jobs/{ident}/subtle-matte-preview')
+    def subtle_matte_preview(ident: str, payload: SubtlePreviewSettings):
+        job = store.get(ident)
+        if not job['media'] or payload.end > job['media']['duration'] + .01:
+            raise HTTPException(422, 'Rentang pratinjau matte berada di luar sumber.')
+        if job['media'].get('audio_only') or not job.get('_source'):
+            raise HTTPException(409, 'Pratinjau matte membutuhkan sumber video.')
+        directory = store.directory(ident)
+        source_file = checked_path(directory / job['_source'], directory, 'Source video')
+        crop_box = None
+        if payload.aspect == 'vertical':
+            sw, sh = int(job['media']['width']), int(job['media']['height'])
+            cw = max(2, min(sw, int(sh * 9 / 16)) // 2 * 2)
+            ch = max(2, min(sh, int(sw * 16 / 9)) // 2 * 2)
+            cx = int((sw - cw) * payload.crop_x) // 2 * 2
+            cy = (sh - ch) // 4 * 2
+            crop_box = (cw, ch, cx, cy)
+            out_w, out_h = 1080, 1920
+        else:
+            out_w = int(job['media']['width'])
+            out_h = int(job['media']['height'])
+        quality = payload.options.matte_quality
+        key_payload = json.dumps({
+            'src': job['_source'], 'start': round(payload.start, 3), 'end': round(payload.end, 3),
+            'aspect': payload.aspect, 'crop_x': round(payload.crop_x, 4), 'quality': quality,
+        }, sort_keys=True)
+        cache_key = hashlib.sha256(key_payload.encode()).hexdigest()[:24]
+        matte_dir = checked_path(directory / 'subtle_cache' / 'mattes', directory, 'Matte preview cache')
+        matte_dir.mkdir(parents=True, exist_ok=True)
+        out_path = checked_path(matte_dir / f'{cache_key}.mp4', directory, 'Packed matte preview')
+        if not out_path.is_file():
+            from . import subtle_vision
+            subtle_vision.generate_packed_preview(
+                source_file, out_path,
+                start=payload.start, end=payload.end,
+                width=out_w, height=out_h,
+                crop_box=crop_box, quality=quality,
+            )
+        return {'key': cache_key, 'url': f'/api/jobs/{ident}/subtle-matte-preview/{cache_key}'}
+
+    @app.get('/api/jobs/{ident}/subtle-matte-preview/{key}')
+    def get_subtle_matte_preview(ident: str, key: str):
+        import re as _re
+        if not _re.fullmatch(r'[a-f0-9]{24}', key):
+            raise HTTPException(404, 'Preview matte tidak ditemukan.')
+        directory = store.directory(ident)
+        path = checked_path(directory / 'subtle_cache' / 'mattes' / f'{key}.mp4', directory, 'Packed matte preview')
+        if not path.is_file():
+            raise HTTPException(404, 'Preview matte belum dibuat.')
+        return FileResponse(path, media_type='video/mp4')
+
+    @app.get('/api/caption-fonts/{filename}')
+    def get_caption_font(filename: str):
+        import re as _re
+        if not _re.fullmatch(r'[A-Za-z0-9_-]+\.ttf', filename):
+            raise HTTPException(404, 'Font tidak ditemukan.')
+        fonts_dir = subtle_styles.subtle_fonts_dir()
+        path = checked_path(fonts_dir / filename, fonts_dir, 'Subtle font asset')
+        if not path.is_file():
+            raise HTTPException(404, 'Berkas font tidak ditemukan.')
+        return FileResponse(path, media_type='font/ttf', filename=filename)
+
+    @app.post('/api/jobs/{ident}/subtle-preview')
+    def subtle_preview(ident: str, payload: SubtlePreviewSettings):
+        job = store.get(ident)
+        if not job['media'] or payload.end > job['media']['duration'] + .01:
+            raise HTTPException(422, 'Rentang subtitle harus berada di dalam sumber media.')
+        directory = store.directory(ident)
+        source_transcript = caption_transcript(directory)
+        if not has_words(source_transcript):
+            raise HTTPException(409, 'Waktu per kata belum tersedia. Gunakan Siapkan waktu per kata terlebih dahulu.')
+        source_file = directory / job['_source'] if job.get('_source') else None
+        crop_box = None
+        if not job['media'].get('audio_only') and payload.aspect == 'vertical':
+            sw, sh = int(job['media']['width']), int(job['media']['height'])
+            cw = max(2, min(sw, int(sh * 9 / 16)) // 2 * 2)
+            ch = max(2, min(sh, int(sw * 16 / 9)) // 2 * 2)
+            cx = int((sw - cw) * payload.crop_x) // 2 * 2
+            cy = (sh - ch) // 4 * 2
+            crop_box = (cw, ch, cx, cy)
+        try:
+            res = subtle_pipeline.prepare_subtle_captions(
+                video_path=source_file,
+                source_info=job['media'],
+                transcript=source_transcript,
+                start=payload.start,
+                end=payload.end,
+                aspect=payload.aspect,
+                options=payload.options.model_dump(),
+                corrections=corrections(directory),
+                crop_box=crop_box,
+                cache_dir=directory / 'subtle_cache',
+            )
+            return res
+        except ValueError as exc:
+            raise HTTPException(422, f'Subtitle Subtle belum dapat disiapkan: {str(exc)[:350]}') from None
+
     @app.post('/api/jobs/{ident}/captions/align')
-    def align_caption_words(ident: str):
+    def align_caption_words(ident: str, payload: AlignCaptionsRequest | None = Body(default=None)):
         job = idle(ident)
         if not job['media']:
             raise HTTPException(409, 'Unggah video sumber terlebih dahulu.')
-        if has_words(caption_transcript(store.directory(ident))):
+        opts = payload.model_dump() if payload else {}
+        if has_words(caption_transcript(store.directory(ident))) and not opts.get('vocab') and not opts.get('hinglish'):
             return store.public(store.update(ident, message='Waktu per kata sudah tersedia; transkripsi tidak diulang.'))
-        return store.public(pipeline.enqueue(ident, {'type': 'align_captions'}))
+        return store.public(pipeline.enqueue(ident, {'type': 'align_captions', 'settings': opts}))
 
     @app.post('/api/jobs/{ident}/analyze')
     def analyze(ident: str, payload: AnalysisSettings):
@@ -902,6 +1048,12 @@ def create_app(data_dir: Path | None = None):
                 raise HTTPException(422, f'Potongan melebihi batas maksimal {preset} detik. Sesuaikan in/out atau pilih mode lain.')
             if payload.caption_style == 'poppins_highlight' and not has_words(caption_transcript(store.directory(ident))):
                 raise HTTPException(409, 'Subtitle Poppins memerlukan waktu per kata. Klik Siapkan waktu per kata, lalu ekspor kembali.')
+            if payload.caption_style == 'subtle':
+                if not has_words(caption_transcript(store.directory(ident))):
+                    raise HTTPException(409, 'Subtitle animasi Subtle memerlukan waktu per kata. Klik Siapkan waktu per kata, lalu ekspor kembali.')
+                rcaps = subtle_renderer.renderer_capabilities()
+                if not rcaps['available']:
+                    raise HTTPException(409, rcaps.get('reason') or 'Renderer Subtle belum siap.')
             if payload.caption_style in {'clean', 'bold'} and not job['transcript_ready']:
                 raise HTTPException(409, 'Transcribe or import a transcript before burning captions.')
             if pipeline.tasks.full():
@@ -912,9 +1064,17 @@ def create_app(data_dir: Path | None = None):
                     settings['_reframe_plan'] = checked_reframe(store,ident,payload)
                 except (ValueError,FileNotFoundError) as error:
                     raise HTTPException(422,str(error)) from None
+            if payload.caption_style == 'subtle':
+                subtle_opts = settings.get('subtle') or {}
+                out_w, out_h = subtle_pipeline.compute_output_dimensions(
+                    job['media'], aspect=payload.aspect, canvas=subtle_opts.get('canvas', '9:16'),
+                )
+            else:
+                out_w = 1080 if payload.aspect == 'vertical' else job['media']['width']
+                out_h = 1920 if payload.aspect == 'vertical' else job['media']['height']
             export_id = uuid.uuid4().hex
-            job['exports'].append({'id': export_id, **payload.model_dump(), 'width': 1080 if payload.aspect == 'vertical' else job['media']['width'],
-                                   'height': 1920 if payload.aspect == 'vertical' else job['media']['height'], 'status': 'queued', 'error': None,
+            job['exports'].append({'id': export_id, **payload.model_dump(), 'width': out_w,
+                                   'height': out_h, 'status': 'queued', 'error': None,
                                    'created_at': now(), 'filename': None})
             store.save(job)
             settings['duration_preset'] = preset
@@ -948,6 +1108,14 @@ def create_app(data_dir: Path | None = None):
     @app.get('/api/jobs/{ident}/exports/{export_id}/captions.vtt')
     def export_vtt(ident: str, export_id: str):
         return FileResponse(export_file(ident, export_id, 'captions.vtt'), media_type='text/vtt', filename='captions.vtt')
+
+    @app.get('/api/jobs/{ident}/exports/{export_id}/captions.json')
+    def export_captions_json(ident: str, export_id: str):
+        return FileResponse(export_file(ident, export_id, 'captions.json'), media_type='application/json', filename='captions.json')
+
+    @app.get('/api/jobs/{ident}/exports/{export_id}/preview.jpg')
+    def export_preview_jpg(ident: str, export_id: str):
+        return FileResponse(export_file(ident, export_id, 'preview.jpg'), media_type='image/jpeg', filename='preview.jpg')
 
     app.add_middleware(UploadLimitMiddleware)
     return app

@@ -87,6 +87,17 @@ relocateFrontend(front, frontendRoot);
 const nodeRoot = directory(path.join(payload, 'node'), PROJECT);
 copy(path.join(PROJECT, '.tools/node/node.exe'), path.join(nodeRoot, 'node.exe'));
 copy(path.join(PROJECT, '.tools/node/LICENSE'), path.join(nodeRoot, 'LICENSE'));
+const subtleSource = checkedPath(path.join(PROJECT, 'subtle-renderer'), PROJECT);
+requiredFile(path.join(subtleSource, 'render.mjs'));
+requiredFile(path.join(subtleSource, 'package.json'));
+requiredFile(path.join(subtleSource, 'bundle/index.html'));
+if (!fs.existsSync(path.join(subtleSource, 'node_modules'))) throw new Error('subtle-renderer node_modules missing.');
+const subtleDest = directory(path.join(payload, 'subtle-renderer'), PROJECT);
+for (const entryName of ['package.json', 'render.mjs', 'build-bundle.mjs', 'bundle', 'node_modules']) {
+  copy(path.join(subtleSource, entryName), path.join(subtleDest, entryName));
+}
+stripDotenvFiles(subtleDest);
+guardTree(subtleDest);
 const toolsRoot = directory(path.join(payload, 'tools'), PROJECT);
 for (const name of ['ffmpeg.exe', 'ffprobe.exe']) copy(findMediaTool(name), path.join(toolsRoot, name));
 const ffmpegPackage = path.dirname(path.dirname(findMediaTool('ffmpeg.exe')));
@@ -95,6 +106,7 @@ for (const name of ['LICENSE', 'README.txt']) {
 }
 fs.writeFileSync(path.join(payload, 'podcut-package.json'), JSON.stringify({ schema: 1, profile_id: 'installer-dev',
   build: 'phase3a', backend: 'backend/PODCUTBackend.exe', frontend: 'frontend/server.js', node: 'node/node.exe',
+  subtle_renderer: 'subtle-renderer/render.mjs',
   ...(quality ? { edition: 'quality-upgrade' } : {}),
   ffmpeg: 'tools/ffmpeg.exe', ffprobe: 'tools/ffprobe.exe', no_installer: true, no_updater: true }, null, 2));
 fs.writeFileSync(path.join(payload, 'PRIVATE-DEVELOPMENT-BUILD.txt'),

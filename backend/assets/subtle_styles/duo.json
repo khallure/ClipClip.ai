@@ -1,0 +1,62 @@
+{
+  "name": "duo",
+  "label": "Duo",
+  "description": "A big condensed caps headline word with a tiny spaced-out lead-in above and a bold italic tail below. The lead-in fades in, the headline cuts in, the tail fades in.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Anton",
+    "file": "Anton-Regular.ttf",
+    "weight": 400
+  },
+  "case": "upper",
+  "size": 10.5,
+  "wideScale": 1.2,
+  "lineHeight": 1.1,
+  "letterSpacing": 0.005,
+  "color": "#E8E22E",
+  "shadow": {
+    "x": 0,
+    "y": 0.3,
+    "blur": 1.2,
+    "color": "rgba(0,0,0,0.4)"
+  },
+  "position": {
+    "x": 50,
+    "y": 68,
+    "marginX": 6
+  },
+  "page": {
+    "maxLines": 1,
+    "minFrames": 14,
+    "maxFrames": 75,
+    "gapBreakMs": 350,
+    "maxWords": 4,
+    "maxCharsPerLine": 26,
+    "maxCharsPerLineWide": 40
+  },
+  "anim": {
+    "type": "duo",
+    "leadFont": {
+      "family": "Inter Medium",
+      "file": "Inter-Medium.ttf",
+      "weight": 500
+    },
+    "tailFont": {
+      "family": "Poppins SemiBold Italic",
+      "file": "Poppins-SemiBoldItalic.ttf",
+      "weight": 600
+    },
+    "leadSize": 1.5,
+    "tailSize": 2.8,
+    "leadTrack": 0.22,
+    "softColor": "rgba(255,255,255,0.88)",
+    "leadIn": 4,
+    "tailIn": 6,
+    "pageOut": 4
+  },
+  "behind": {
+    "enabled": false
+  }
+}

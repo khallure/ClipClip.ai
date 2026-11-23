@@ -1,0 +1,51 @@
+{
+  "name": "terminal",
+  "label": "Terminal",
+  "description": "Green monospace typed character by character with a blinking block cursor.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Courier Prime Bold",
+    "file": "CourierPrime-Bold.ttf",
+    "weight": 700
+  },
+  "case": "lower",
+  "size": 3.9,
+  "wideScale": 1.5,
+  "lineHeight": 1.45,
+  "letterSpacing": 0,
+  "color": "#35E066",
+  "activeColor": "#35E066",
+  "shadow": null,
+  "emphasis": {
+    "fill": "#35E066",
+    "color": "#06140A"
+  },
+  "position": {
+    "y": 63,
+    "marginX": 8
+  },
+  "page": {
+    "maxWords": 6,
+    "maxCharsPerLine": 24,
+    "maxCharsPerLineWide": 44,
+    "maxLines": 2,
+    "minFrames": 18,
+    "maxFrames": 120,
+    "gapBreakMs": 400
+  },
+  "anim": {
+    "type": "terminal",
+    "cps": 18,
+    "blink": 6
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "scrim",
+    "max": 1,
+    "accent": false
+  }
+}

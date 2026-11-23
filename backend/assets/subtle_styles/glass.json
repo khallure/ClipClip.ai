@@ -1,0 +1,70 @@
+{
+  "name": "glass",
+  "label": "Glass",
+  "description": "One frosted-glass pill per page in soft lowercase; upcoming words are dim and brighten as they are spoken.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Inter Medium",
+    "file": "Inter-Medium.ttf",
+    "weight": 500
+  },
+  "case": "lower",
+  "size": 3.7,
+  "wideScale": 1.35,
+  "lineHeight": 1.28,
+  "letterSpacing": -0.005,
+  "color": "#F4EFF1",
+  "shadow": {
+    "x": 0,
+    "y": 0.1,
+    "blur": 0.3,
+    "color": "rgba(0,0,0,0.18)"
+  },
+  "backdropBlur": 20,
+  "container": {
+    "kind": "pill",
+    "fill": "rgba(86,80,78,0.46)",
+    "highlight": "rgba(255,255,255,0.55)",
+    "padX": 0.9,
+    "padY": 0.62,
+    "radius": 0.7
+  },
+  "emphasis": {
+    "color": "#FFC46B",
+    "font": {
+      "family": "Inter SemiBold",
+      "file": "Inter-SemiBold.ttf",
+      "weight": 600
+    }
+  },
+  "position": {
+    "y": 74,
+    "marginX": 9
+  },
+  "page": {
+    "maxWords": 6,
+    "maxCharsPerLine": 24,
+    "maxCharsPerLineWide": 44,
+    "maxLines": 2,
+    "minFrames": 18,
+    "maxFrames": 120,
+    "gapBreakMs": 400
+  },
+  "anim": {
+    "type": "glass",
+    "pageIn": 3,
+    "pageOut": 3,
+    "pageScaleFrom": 0.96,
+    "wordIn": 3,
+    "dim": 0.38
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "plate",
+    "max": 1
+  }
+}

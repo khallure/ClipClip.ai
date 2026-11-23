@@ -1,0 +1,59 @@
+{
+  "name": "karaoke",
+  "label": "Karaoke",
+  "description": "The whole line shows dim; each word turns solid as it is spoken. One weight, no motion.",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Inter SemiBold",
+    "file": "Inter-SemiBold.ttf",
+    "weight": 600
+  },
+  "case": "sentence",
+  "size": 4.3,
+  "wideScale": 1.15,
+  "lineHeight": 1.3,
+  "letterSpacing": 0,
+  "color": "#FFFFFF",
+  "shadow": {
+    "x": 0,
+    "y": 0.25,
+    "blur": 1.0,
+    "color": "rgba(0,0,0,0.75)"
+  },
+  "emphasis": {
+    "color": {
+      "auto": "accent",
+      "fallback": "#FFD24A"
+    },
+    "scale": 1.07
+  },
+  "position": {
+    "y": 74,
+    "marginX": 9
+  },
+  "page": {
+    "maxWords": 10,
+    "maxCharsPerLine": 28,
+    "maxCharsPerLineWide": 50,
+    "maxLines": 2,
+    "minFrames": 20,
+    "maxFrames": 140,
+    "gapBreakMs": 500
+  },
+  "anim": {
+    "type": "karaoke",
+    "dim": 0.66,
+    "wordIn": 3,
+    "pageIn": 2,
+    "pageOut": 2
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "halo",
+    "max": 1
+  }
+}

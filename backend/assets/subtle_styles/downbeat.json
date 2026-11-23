@@ -1,0 +1,132 @@
+{
+  "name": "downbeat",
+  "label": "Downbeat",
+  "description": "Bold caps on flat colour fields, one to four words a page. Lines spin or slide in with overshoot on the beat; the field flips colour every few bars.",
+  "group": "music",
+  "engines": [
+    "remotion"
+  ],
+  "font": {
+    "family": "Anton",
+    "file": "Anton-Regular.ttf",
+    "weight": 400
+  },
+  "lineFonts": [
+    {
+      "family": "Anton",
+      "file": "Anton-Regular.ttf",
+      "weight": 400
+    },
+    {
+      "family": "Montserrat Black",
+      "file": "Montserrat-Black.ttf",
+      "weight": 900
+    },
+    {
+      "family": "Bebas Neue",
+      "file": "BebasNeue-Regular.ttf",
+      "weight": 400
+    },
+    {
+      "family": "Poppins Black",
+      "file": "Poppins-Black.ttf",
+      "weight": 900
+    },
+    {
+      "family": "Archivo Black",
+      "file": "ArchivoBlack-Regular.ttf",
+      "weight": 400
+    }
+  ],
+  "case": "upper",
+  "size": 12,
+  "wideScale": 1,
+  "lineHeight": 1,
+  "letterSpacing": 0.02,
+  "color": "#FBFBFB",
+  "position": {
+    "y": 50,
+    "marginX": 6
+  },
+  "emphasis": {
+    "fill": 0.94,
+    "maxSize": 26,
+    "maxSizeTall": 34
+  },
+  "page": {
+    "unit": "line",
+    "linesPerPage": 1,
+    "maxWords": 3,
+    "maxCharsPerLine": 16,
+    "maxCharsPerLineWide": 24,
+    "maxLines": 3,
+    "snap": "beat",
+    "hold": true,
+    "minFrames": 12,
+    "maxFrames": 150,
+    "gapBreakMs": 600
+  },
+  "anim": {
+    "type": "downbeat",
+    "inFrames": 4,
+    "moves": [
+      "spin",
+      "up",
+      "spin",
+      "left",
+      "spin",
+      "wipe",
+      "down"
+    ],
+    "fills": [
+      0.9,
+      0.72,
+      0.84,
+      0.62
+    ],
+    "maxSize": 23,
+    "stagger": 2,
+    "connectorSize": 6,
+    "fieldBars": 4,
+    "fieldPages": 6,
+    "fields": [
+      {
+        "bg": "#000000",
+        "fg": "#FBFBFB"
+      },
+      {
+        "bg": "#FFFFFF",
+        "fg": "#2B2B2B"
+      },
+      {
+        "bg": "#FEA201",
+        "fg": "#121212"
+      }
+    ],
+    "accentField": 2,
+    "fillsTall": [
+      0.94,
+      0.9,
+      0.95,
+      0.86
+    ],
+    "maxSizeTall": 30,
+    "maxWidthTall": 0.95,
+    "gapTall": 0.65,
+    "maxStackTall": 0.7,
+    "minStackTall": 0.44,
+    "maxStretchTall": 1.05,
+    "condensedTall": [
+      0,
+      2
+    ],
+    "connectorFillTall": 0.5,
+    "connectorSizeTall": 9
+  },
+  "behind": {
+    "enabled": false
+  },
+  "legibility": {
+    "mode": "none"
+  }
+}
